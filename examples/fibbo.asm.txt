@@ -1,22 +1,62 @@
-//loop from 2 until 47
-insert r5 0x2f      //set loop end value
-insert r6 2         //use r6 as counter
-insert r7 1         //increment by 1
-insert br 6         //set a loop point
+// **********************************************************************
+// begin with setting some init values 
+//
 
-insert r1 00        //start counting at 0 and 1
+// use r5 as end loop point, as loop from 2 until 47
+insert r5 47
+
+// use r6 as loop counter
+insert r6 2
+
+// want this loop to increment by 1
+insert buffer 1
+
+// set loop point to return progc back here
+insert addr 6 
+
+// fibbonacically add r1 r1, start counting at 0 and 1
+insert r1 0
 insert r2 1
 
-//loop
-xor zr zr zr        //flag reset (from loop)
+
+
+// **********************************************************************
+// let's start adding numbers
+//
+
+// reset flag from previous loop comparison
+xor zero zero zero
+
+// add values fibbonacically
 add r3 r1 r2
+
+// set these two values as the result for next iteration
 move r1 r2 always
 move r2 r3 always
 
-add r6 r6 r7        //r6 += 1
+// increment loop counter
+add r6 r6 buffer
 
-nor zr zr zr        //flag on
-sub zr r5 r6        //flag = r5 - r6
-mov pc br hi        //loop back again if unsigned-higher (r5 > r6)
 
-store r3 at zr 0
+
+// **********************************************************************
+// looping the prog counter back
+//
+
+// turn flag on for looping comparison
+nor zero zero zero
+
+// set flag = r5 - r6, i.e. trying to do unsigned comparison
+sub zero r5 r6
+
+// loop back again if unsigned-higher (r5 > r6)
+move progc addr hi
+
+
+
+// **********************************************************************
+// finished
+//
+
+// write value at location 0
+store r3 at zero

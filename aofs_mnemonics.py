@@ -18,7 +18,7 @@ registers = [
     "buffer",   # Buffer register   - immediate values
     "return",   # Return register   - values from previous call
     "stack",    # Stack pointer     - keep track the current top of the stack
-    "address",  # Address register  - for memory and jumps
+    "addr",     # Address register  - for memory and jumps
     "link",     # Link register     - keep progc addresses to return to
     "progc"     # Program counter   - current instruction to execute
 ]

@@ -10,13 +10,17 @@ def asmfile_to_hexfile(filename : str) -> None:
 def parse_line(asmline : str) -> int:
     tokens = asmline.split()
 
-    if tokens[0].lower() not in aofs_mnemonics.instructions:
-        raise Exception(f"Unrecognized instruction: {tokens[0]}")
-    bincode = aofs_mnemonics.instructions.index(tokens[0].lower()) << 12
+    instr_token = tokens[0]
+    if instr_token.lower() not in aofs_mnemonics.instructions:
+        raise Exception(f"Unrecognized instruction: {instr_token}")
+    bincode = aofs_mnemonics.instructions.index(instr_token.lower()) << 12
     
-    if tokens[1].lower() not in aofs_mnemonics.registers:
-        raise Exception(f"Unrecognized Rd register: {tokens[0]}")
-    bincode = aofs_mnemonics.registers.index(tokens[1].lower()) << 8
+    rd_token = tokens[1]
+    if rd_token.lower() not in aofs_mnemonics.registers:
+        raise Exception(f"Unrecognized Rd register: {rd_token}")
+    bincode = aofs_mnemonics.registers.index(rd_token.lower()) << 8
+
+    return bincode
 
     # parse each type differently
     
