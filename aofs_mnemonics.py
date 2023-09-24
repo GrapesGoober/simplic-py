@@ -1,6 +1,6 @@
 instructions = [
     # General purpose instructions
-    "move", "addc", "load", "store", "insert", 
+    "move", "cadd", "load", "store", "insert", 
     # Arithmatic instructions
     "shift", "add", "sub", "mul", "longmul", "divide", "mod", 
     # Logic instructions
