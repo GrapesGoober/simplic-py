@@ -22,3 +22,10 @@ registers = [
     "link",     # Link register     - keep progc addresses to return to
     "progc"     # Program counter   - current instruction to execute
 ]
+
+shift_type = [
+	"left",
+    "right",
+    "arith",
+    "rotate"
+]
