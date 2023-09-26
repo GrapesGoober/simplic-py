@@ -2,29 +2,29 @@ import aofs_mnemonics
 
 instructions = [
     # Conditional instructions
-    ("move", 		parse_Rd, parse_Rn, parse_CND ),
-    ("cadd", 		parse_Rd, parse_Rn, parse_CND ),
+    ("move", "cond" ), ("cadd", "cond" ),
     
     # Memory instructions, with 4-bit post indexing
-    ("load", 		parse_Rd, parse_Rn, parse_imm4 ),
-    ("store", 		parse_Rd, parse_Rn, parse_imm4 ),
+    ("load", "memory" ), ("store", "memory" ),
     
     # Insert instruction with 8-bit immediate
-    ("insert",		parse_Rd, parse_imm8 ),
+    ("insert", "insert" ),
     
     # ALU instructions
-    ("shift", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("add", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("sub", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("mul", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("longmul",		parse_Rd, parse_Rn, parse_Rm ),
-    ("divide", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("mod", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("and", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("or", 			parse_Rd, parse_Rn, parse_Rm ),
-    ("xor", 		parse_Rd, parse_Rn, parse_Rm ),
-    ("nor" 			parse_Rd, parse_Rn, parse_Rm )
+    ("shift", "alu" ),
+    ("add", "alu" ),		("sub", "alu" ),
+    ("mul", "alu" ),		("longmul", "alu" ),
+    ("divide", "alu" ), 	("mod", "alu" ),
+    ("and", "alu" ), 		("or", "alu" ),
+    ("xor", "alu" ),		("nor", "alu" )
 ]
+
+operands = {
+	"cond" : [ parse_reg, parse_cond ],
+    "memory" : [ parse_reg, parse_imm4 ],
+    "insert" : [ parse_imm8 ],
+    "alu" : [ parse_reg, parse_reg, parse_reg ]
+}
 
 
 def asmfile_to_hexfile(filename : str) -> None:
