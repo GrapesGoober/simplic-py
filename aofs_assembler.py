@@ -1,28 +1,23 @@
 import aofs_mnemonics
 
-instructions = [
-    # Conditional instructions
-    ("move", "cond" ), ("cadd", "cond" ),
-    
-    # Memory instructions, with 4-bit post indexing
-    ("load", "memory" ), ("store", "memory" ),
-    
-    # Insert instruction with 8-bit immediate
-    ("insert", "insert" ),
-    
-    # ALU instructions
-    ("shift", "alu" ),
-    ("add", "alu" ),		("sub", "alu" ),
-    ("mul", "alu" ),		("longmul", "alu" ),
-    ("divide", "alu" ), 	("mod", "alu" ),
-    ("and", "alu" ), 		("or", "alu" ),
-    ("xor", "alu" ),		("nor", "alu" )
-]
+# different types of instructions
+instructions = {
+	"cond" : [ "move", "cadd" ],
+    "memory" : [ "load", "store" ],
+    "insert" : [ "insert" ],
+    "shift" : [ "shift" ],
+    "alu" : [ 
+    	"add", "sub", "mul", "longmul", "div", "mod", 
+        "and", "or", "xor", "nor"
+    ]
+}
 
+# operands for each types of instructions
 operands = {
 	"cond" : [ parse_reg, parse_cond ],
     "memory" : [ parse_reg, parse_imm4 ],
     "insert" : [ parse_imm8 ],
+    "shift" : [ parse_sft, parse_reg ],
     "alu" : [ parse_reg, parse_reg, parse_reg ]
 }
 
