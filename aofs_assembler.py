@@ -2,27 +2,28 @@ import aofs_mnemonics
 
 instructions = [
     # Conditional instructions
-    ("move", 	parse_conditional_operands),
-    ("cadd", 	parse_conditional_operands),
+    ("move", 		parse_Rd, parse_Rn, parse_CND ),
+    ("cadd", 		parse_Rd, parse_Rn, parse_CND ),
     
-    # Memory instructions, with 4-bit immediate post indexing
-    ("load", 	parse_indexing_operands),
-    ("store", 	parse_indexing_operands),
+    # Memory instructions, with 4-bit post indexing
+    ("load", 		parse_Rd, parse_Rn, parse_imm4 ),
+    ("store", 		parse_Rd, parse_Rn, parse_imm4 ),
     
-    ("insert",	parse_insert_operands),
+    # Insert instruction with 8-bit immediate
+    ("insert",		parse_Rd, parse_imm8 ),
     
     # ALU instructions
-    ("shift", 	parse_alu_operands),
-    ("add", 	parse_alu_operands),
-    ("sub", 	parse_alu_operands),
-    ("mul", 	parse_alu_operands),
-    ("longmul",	parse_alu_operands),
-    ("divide", 	parse_alu_operands),
-    ("mod", 	parse_alu_operands),
-    ("and", 	parse_alu_operands),
-    ("or", 		parse_alu_operands),
-    ("xor", 	parse_alu_operands),
-    ("nor" 		parse_alu_operands)
+    ("shift", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("add", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("sub", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("mul", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("longmul",		parse_Rd, parse_Rn, parse_Rm ),
+    ("divide", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("mod", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("and", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("or", 			parse_Rd, parse_Rn, parse_Rm ),
+    ("xor", 		parse_Rd, parse_Rn, parse_Rm ),
+    ("nor" 			parse_Rd, parse_Rn, parse_Rm )
 ]
 
 
@@ -44,16 +45,3 @@ def parse_line(asmline : str) -> int:
         raise Exception(f"Unrecognized Rd register: {tokens[0]}")
     bincode = aofs_mnemonics.registers.index(tokens[1].lower()) << 8
 
-    # parse each type differently
-    
-def parse_conditional_operands(tokens : list) -> int:
-    pass
-    
-def parse_indexing_operands(tokens : list) -> int:
-    pass
-    
-def parse_insert_operands(tokens : list) -> int:
-    pass
-    
-def parse_alu_operands(tokens : list) -> int:
-	pass
