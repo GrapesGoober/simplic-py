@@ -39,67 +39,30 @@ token_set = {
 }
 
 # (Internal) Returns a function to parse token with a specified type
-def parse_token(token_type : str) -> int:
+def parse_token(token : str, token_type : str) -> int:
+    if token.lower() not in token_set[token_type]:
+        raise Exception(f"Unrecognized {token_type} '{token}'")
+    else:
+        return token_set[token_type].index(token.lower())
 
-    def parser(token : str) -> int:
-        if token.lower() not in token_set[token_type]:
-            raise Exception(f"Unrecognized {token_type} '{token}'")
+# (Internal) Parse an immediate with the specified bitsize limitation
+def parse_imm(token : str, bit_size : int) -> int:
+    result = 0
+    try:
+        if token.startswith("0x"):
+            result = int(token, 16)
+        elif token.startswith("0b"): 
+            result = int(token, 2)
         else:
-            return token_set[token_type].index(token.lower())
+            result = int(token, 10)
+    except:
+        raise Exception(f"Invalid immediate '{token}'")
+
+    if result.bit_length() > bit_size:
+        raise Exception(f"Immediate value '{token}' too big for {bit_size} bits.")
     
-    return parser
+    return result
 
-# (Internal) Returns a function to parse immediate value with the specified bitsize limitation
-def parse_imm(bit_size : int):
-
-    def parser(token : str) -> int:
-        result = 0
-        try:
-            if token.startswith("0x"):
-                result = int(token, 16)
-            elif token.startswith("0b"): 
-                result = int(token, 2)
-            else:
-                result = int(token, 10)
-        except:
-            raise Exception(f"Invalid immediate '{token}'")
-
-        if result.bit_length() > bit_size:
-            raise Exception(f"Immediate value '{token}' too big for {bit_size} bits.")
-        
-        return result
-    
-    return parser
-
-# (Internal) Defining how each types of instruction recieve operands
-# Key   : Instruction type
-# Value : A list of parser functions for the instruction's operands
-operands = {
-    "condition" : [ 
-        parse_token("register"), # Rd   - Destination Register
-        parse_token("register"), # Rn   - Input Register 1
-        parse_token("condition") # CND  - Condition
-    ],
-    "memory" : [ 
-        parse_token("register"), # Rd   - Destination Register
-        parse_token("register"), # Rn   - Address
-        parse_imm(4)             # Imm4 - Post Addressing
-    ],
-    "insert" : [ 
-        parse_token("register"), # Rd   - Destination Register
-        parse_imm(8)             # Imm8 - Immediate value to insert
-    ],
-    "shift" : [ 
-        parse_token("register"), # Rd   - Destination Register
-        parse_token("shift-op"), # Op   - Shifting operation
-        parse_token("register")  # Rm   - Distance to shift
-    ],
-    "alu" : [ 
-        parse_token("register"), # Rd - Destination Register
-        parse_token("register"), # Rn - Input Register 1
-        parse_token("register"), # Rm - Input Register 2
-    ]
-}
 
 # (Internal) Parses an instruction token and returns instruction index and type
 def parse_instr(token : str) -> (int, str):
@@ -124,3 +87,16 @@ def parse_line(asmline : str) -> int:
     # firstly, iterate to get the instruction index and operand parsers
     instr, instr_type = parse_instr(tokens[0])
     operand_parsers = operands[instr_type]
+    
+    if instr_type == "condition":
+        pass
+    elif instr_type == "memory":
+        pass
+    elif instr_type == "insert":
+        pass
+    elif instr_type == "shift":
+        pass
+    elif instr_type == "alu":
+        pass
+    else:
+        raise Exception("Undefined instruction type")
