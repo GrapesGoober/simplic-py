@@ -1,26 +1,4 @@
-import aofs_mnemonics
-
-# different types of instructions
-instructions = {
-	"cond" : [ "move", "cadd" ],
-    "memory" : [ "load", "store" ],
-    "insert" : [ "insert" ],
-    "shift" : [ "shift" ],
-    "alu" : [ 
-    	"add", "sub", "mul", "longmul", "div", "mod", 
-        "and", "or", "xor", "nor"
-    ]
-}
-
-# operands for each types of instructions
-operands = {
-	"cond" : [ parse_reg, parse_cond ],
-    "memory" : [ parse_reg, parse_imm4 ],
-    "insert" : [ parse_imm8 ],
-    "shift" : [ parse_sft, parse_reg ],
-    "alu" : [ parse_reg, parse_reg, parse_reg ]
-}
-
+import aofs_asm_parser
 
 def asmfile_to_hexfile(filename : str) -> None:
     with open(filename, mode = "r") as file:
@@ -32,11 +10,11 @@ def asmfile_to_hexfile(filename : str) -> None:
 def parse_line(asmline : str) -> int:
     tokens = asmline.split()
 
-    if tokens[0].lower() not in aofs_mnemonics.instructions:
+    if tokens[0].lower() not in aofs_asm_parser.instructions:
         raise Exception(f"Unrecognized instruction: {tokens[0]}")
-    bincode = aofs_mnemonics.instructions.index(tokens[0].lower()) << 12
+    bincode = aofs_asm_parser.instructions.index(tokens[0].lower()) << 12
     
-    if tokens[1].lower() not in aofs_mnemonics.registers:
+    if tokens[1].lower() not in aofs_asm_parser.register_tokens:
         raise Exception(f"Unrecognized Rd register: {tokens[0]}")
-    bincode = aofs_mnemonics.registers.index(tokens[1].lower()) << 8
+    bincode = aofs_asm_parser.register_tokens.index(tokens[1].lower()) << 8
 
