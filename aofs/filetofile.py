@@ -1,4 +1,4 @@
-import aofs.assembly as assembly
+import aofs
 
 def to_hexfile(filename : str) -> None:
     with open(filename, mode = "r") as file:

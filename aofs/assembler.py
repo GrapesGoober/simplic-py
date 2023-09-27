@@ -1,6 +1,6 @@
-# Defining a set of instruction types and their instructions
+# Defining instruction set with their instruction type
 instructions = {
-    "cond" : [ "move", "cadd" ],
+    "condition" : [ "move", "cadd" ],
     "memory" : [ "load", "store" ],
     "insert" : [ "insert" ],
     "shift" : [ "shift" ],
@@ -75,7 +75,7 @@ def parse_imm(bit_size : int):
 # Key   : Instruction type
 # Value : A list of parser functions for the instruction's operands
 operands = {
-    "cond" : [ 
+    "condition" : [ 
         parse_token("register"), # Rd   - Destination Register
         parse_token("register"), # Rn   - Input Register 1
         parse_token("condition") # CND  - Condition
