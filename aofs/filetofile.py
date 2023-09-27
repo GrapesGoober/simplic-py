@@ -5,10 +5,6 @@ def to_hexfile(filename : str) -> None:
         for line in file:
             line = line.strip()
             if line == "" or line.startswith("//"): continue
-            print(hex(parse_line(line)))
+            print(hex(aofs.parse_line(line)))
 
-def parse_line(asmline : str) -> int:
-    tokens = asmline.split()
-    print(tokens)
-    return 0
 

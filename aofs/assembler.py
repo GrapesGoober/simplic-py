@@ -1,4 +1,4 @@
-# Defining instruction set with their instruction type
+# (Internal) Defining instruction set with their instruction type
 instructions = {
     "condition" : [ "move", "cadd" ],
     "memory" : [ "load", "store" ],
@@ -10,7 +10,7 @@ instructions = {
     ]
 }
 
-# Defining a set of operand tokens (excluding instructions)
+# (Internal) Defining a set of operand tokens (excluding instructions)
 token_set = {
     "register" : [
         # A special zero value for resetting registers
@@ -38,7 +38,7 @@ token_set = {
     ]
 }
 
-# Returns a function to parse token with a specified type
+# (Internal) Returns a function to parse token with a specified type
 def parse_token(token_type : str) -> int:
 
     def parser(token : str) -> int:
@@ -49,7 +49,7 @@ def parse_token(token_type : str) -> int:
     
     return parser
 
-# Returns a function to parse immediate value with the specified bitsize limitation
+# (Internal) Returns a function to parse immediate value with the specified bitsize limitation
 def parse_imm(bit_size : int):
 
     def parser(token : str) -> int:
@@ -71,7 +71,7 @@ def parse_imm(bit_size : int):
     
     return parser
 
-# Defining how each types of instruction recieve operands
+# (Internal) Defining how each types of instruction recieve operands
 # Key   : Instruction type
 # Value : A list of parser functions for the instruction's operands
 operands = {
@@ -101,3 +101,26 @@ operands = {
     ]
 }
 
+# (Internal) Parses an instruction token and returns instruction index and type
+def parse_instr(token : str) -> (int, str):
+    
+    instr_index = 0
+    for instr_type in instructions:
+        if token.lower() in instructions[instr_type]:
+            instr_index += instructions[instr_type].index(token.lower())
+            return instr_index, instr_type
+        else:
+            instr_index += len(instructions[instr_type])
+
+    # If did not return within loop, then assume it wasn't found
+    raise Exception(f"Unrecognized instruction '{token}'")
+
+
+# Parses a line of assembly to binary code
+def parse_line(asmline : str) -> int:
+    asmline = asmline.strip()
+    tokens = asmline.split()
+
+    # firstly, iterate to get the instruction index and operand parsers
+    instr, instr_type = parse_instr(tokens[0])
+    operand_parsers = operands[instr_type]
