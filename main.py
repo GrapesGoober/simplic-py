@@ -1,9 +1,8 @@
-import sys, aofs_assembler
+import sys, aofs
 
 if __name__ == "__main__":
 
-    # if len(sys.argv) != 2:
-    #     raise Exception("Requires second argument for file path")
+    if len(sys.argv) != 2:
+        raise Exception("Requires second argument for file path")
     
-    # aofs_assembler.asmfile_to_hexfile(sys.argv[1])
-    pass
+    aofs.to_hexfile(sys.argv[1])

@@ -49,7 +49,7 @@ def parse_token(token_type : str) -> int:
     
     return parser
 
-# Returns a function to parse immediate valuue with the specified bitsize limitation
+# Returns a function to parse immediate value with the specified bitsize limitation
 def parse_imm(bit_size : int):
 
     def parser(token : str) -> int:
@@ -73,7 +73,7 @@ def parse_imm(bit_size : int):
 
 # Defining how each types of instruction recieve operands
 # Key   : Instruction type
-# Value : A list of parser functions specific to that function type
+# Value : A list of parser functions for the instruction's operands
 operands = {
     "cond" : [ 
         parse_token("register"), # Rd   - Destination Register
