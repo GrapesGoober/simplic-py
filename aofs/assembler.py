@@ -1,5 +1,6 @@
+import asm_tokens
 
-# (Internal) Returns a function to parse token with a specified type
+# (Internal) Parses a token to hex value
 def parse_token(token : str, token_type : str) -> int:
     if token.lower() not in token_set[token_type]:
         raise Exception(f"Unrecognized {token_type} '{token}'")
@@ -24,29 +25,13 @@ def parse_imm(token : str, bit_size : int) -> int:
     
     return result
 
-
-# (Internal) Parses an instruction token and returns instruction index and type
-def parse_instr(token : str) -> (int, str):
-    
-    instr_index = 0
-    for instr_type in instructions:
-        if token.lower() in instructions[instr_type]:
-            instr_index += instructions[instr_type].index(token.lower())
-            return instr_index, instr_type
-        else:
-            instr_index += len(instructions[instr_type])
-
-    # If did not return within loop, then assume it wasn't found
-    raise Exception(f"Unrecognized instruction '{token}'")
-
-
 # Parses a line of assembly to binary code
 def parse_line(asmline : str) -> int:
     asmline = asmline.strip()
     tokens = asmline.split()
 
     # firstly, iterate to get the instruction index and operand parsers
-    instr, instr_type = parse_instr(tokens[0])
+    instr, instr_type = parse_token(tokens[0], instructions)
     operand_parsers = operands[instr_type]
     
     if instr_type == "condition":
@@ -56,8 +41,6 @@ def parse_line(asmline : str) -> int:
     elif instr_type == "insert":
         pass
     elif instr_type == "shift":
-        pass
-    elif instr_type == "alu":
         pass
     else:
         raise Exception("Undefined instruction type")
