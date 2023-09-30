@@ -31,12 +31,12 @@ token_set = {
         "positive",
         "overflow",
         "notoverflow",
-        "ulesser",      # unsigned, Z or C
-        "ugreater",     # unsigned, !Z and !C
-        "lesser",       # signed, N != V
-        "greater",      # signed, !Z and (N == V)
-        "lesserequal",  # signed, Z or (N != V)
-        "greaterequal", # signed, N == V
+        "usmaller",     # unsigned, Z or C
+        "uhigher",      # unsigned, !Z and !C
+        "smaller",      # signed, N != V
+        "higher",       # signed, !Z and (N == V)
+        "smallerequal", # signed, Z or (N != V)
+        "higherequal",  # signed, N == V
         "flagclear",    # Z and !N and !C and !V
         "always"
     ],
