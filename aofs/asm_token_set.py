@@ -1,4 +1,4 @@
-tokenset = {
+token_set = {
     "instruction" : [
         # General purpose instructions
         "move", "cadd", "load", "store", "insert", 
