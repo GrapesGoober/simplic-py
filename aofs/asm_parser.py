@@ -1,5 +1,5 @@
 from math import ceil
-import asm_token_set
+from asm_tokenset import token_set
 
 # Get the token index
 def parse_token(token : str, token_type : str) -> int:
