@@ -1,4 +1,3 @@
-from math import ceil
 from asm_token_set import token_set
 
 # Parse a token into integer code (i.e. index of token)
