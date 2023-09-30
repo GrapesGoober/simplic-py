@@ -1,4 +1,4 @@
-from asm_token_set import token_set
+from aofs.asm_token_set import token_set
 
 # Parse a token into integer code (i.e. index of token)
 def parse_token(token : str, token_type : str) -> int:
@@ -40,13 +40,15 @@ def parse_line(asmline : str) -> int:
     rd = parse_token(tokens[1], "register")
 
     # parsing operands are finicky; syntax is specific to opcode
-    if instr in [0, 1]:
+    if opcode in [0, 1]:
         pass
-    elif instr in [2, 3]:
+    elif opcode in [2, 3]:
         pass
-    elif instr == 4:
+    elif opcode == 4:
         pass
-    elif instr == 5:
+    elif opcode == 5:
         pass
     else:
         raise Exception("Opcode undefined")
+    
+    return opcode
