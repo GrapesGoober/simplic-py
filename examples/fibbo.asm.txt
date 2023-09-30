@@ -12,9 +12,9 @@ insert r6 2
 insert buffer 1
 
 // set loop point to return progc back here
-insert addr 6 
+insert address 6 
 
-// fibbonacically add r1 r1, start counting at 0 and 1
+// fibbonacically add r1 r2, start counting at 0 and 1
 insert r1 0
 insert r2 1
 
@@ -50,7 +50,7 @@ nor zero zero zero
 sub zero r5 r6
 
 // loop back again if unsigned-higher (r5 > r6)
-move progc addr hi
+move progc address uhigher
 
 
 
@@ -59,4 +59,4 @@ move progc addr hi
 //
 
 // write value at location 0
-store r3 at zero
+store r3 zero 0
