@@ -1,7 +1,7 @@
 from math import ceil
-from asm_tokenset import token_set
+from asm_token_set import token_set
 
-# Get the token index
+# Parse a token into integer code (i.e. index of token)
 def parse_token(token : str, token_type : str) -> int:
     if token_type not in token_set:
         raise Exception(f"Token type {token_type} does not exist.")
@@ -13,13 +13,13 @@ def parse_token(token : str, token_type : str) -> int:
     else:
         raise Exception(f"Unrecognized {token_type} '{token}'.")
 
-# Parse an immediate into integer value with the specified bitsize
+# Parse an immediate into integer with the specified bitsize
 def parse_imm(token : str, bit_size : int) -> int:
     result = 0
     try:
-        if token.startswith("0x"):
+        if token.lower().startswith("0x"):
             result = int(token, 16)
-        elif token.startswith("0b"): 
+        elif token.lower().startswith("0b"): 
             result = int(token, 2)
         else:
             result = int(token, 10)
@@ -29,11 +29,9 @@ def parse_imm(token : str, bit_size : int) -> int:
     if result.bit_length() > bit_size:
         raise Exception(f"Immediate value '{token}' too big for {bit_size} bits.")
 
-    # must return hex of the proper digits for bitsize
-    zeros = (bitcount  - intvalue.bit_length()) // 4
     return result
 
-# Parses a line of assembly to binary code
+# Parses a line of assembly to integer code
 def parse_line(asmline : str) -> int:
     asmline = asmline.strip()
     tokens = asmline.split()
