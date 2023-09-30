@@ -1,20 +1,20 @@
 from math import ceil
 import asm_token_set
 
-# Get the token index in unprefixed hex
-def __hexify_token(token : str, token_type : str) -> str:
+# Get the token index
+def parse_token(token : str, token_type : str) -> int:
     if token_type not in token_set:
         raise Exception(f"Token type {token_type} does not exist.")
         
     token_list = token_set[token_type]
     if token.lower() in token_list:
-        indexof = token_list.index(token.lower())
-        return hex(indexof)[2:]
+        token_index = token_list.index(token.lower())
+        return token_index
     else:
         raise Exception(f"Unrecognized {token_type} '{token}'.")
 
 # Parse an immediate into integer value with the specified bitsize
-def __hexify_imm(token : str, bit_size : int) -> str:
+def parse_imm(token : str, bit_size : int) -> int:
     result = 0
     try:
         if token.startswith("0x"):
@@ -31,24 +31,25 @@ def __hexify_imm(token : str, bit_size : int) -> str:
 
     # must return hex of the proper digits for bitsize
     zeros = (bitcount  - intvalue.bit_length()) // 4
-    return ("0" * zeros) + hex(result)[2:]
+    return result
 
 # Parses a line of assembly to binary code
 def parse_line(asmline : str) -> int:
     asmline = asmline.strip()
     tokens = asmline.split()
 
-    # firstly, iterate to get the instruction index and operand parsers
-    instr = parse_token(tokens[0], instructions)
-    operand_parsers = operands[instr_type]
-    
-    if instr_type == "condition":
+    # firstly, get the opcode and rd code
+    opcode = parse_token(tokens[0], "instruction")
+    rd = parse_token(tokens[1], "register")
+
+    # parsing operands are finicky; syntax is specific to opcode
+    if instr in [0, 1]:
         pass
-    elif instr_type == "memory":
+    elif instr in [2, 3]:
         pass
-    elif instr_type == "insert":
+    elif instr == 4:
         pass
-    elif instr_type == "shift":
+    elif instr == 5:
         pass
     else:
-        raise Exception("Undefined instruction type")
+        raise Exception("Opcode undefined")
