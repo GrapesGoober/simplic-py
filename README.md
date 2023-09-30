@@ -12,6 +12,6 @@ A refactor of simplic compiler built in python
     └── aofs/
         ├── __init__.py
         ├── asm_parser.py
-        ├── asm_builder.py
-        └── output.py
+        ├── asm_token_set.py
+        └── filetofile.py
 ```
