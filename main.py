@@ -6,3 +6,4 @@ if __name__ == "__main__":
         raise Exception("Requires second argument for file path")
     
     aofs.to_hexfile(sys.argv[1])
+

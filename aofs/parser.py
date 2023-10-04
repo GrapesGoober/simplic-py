@@ -1,4 +1,4 @@
-from aofs.asm_token_set import token_set
+from aofs.token_set import token_set
 
 # Parse a token into integer code (i.e. index of token)
 def parse_token(tokens : list, token_type : str) -> int:
