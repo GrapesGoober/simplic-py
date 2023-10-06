@@ -1,7 +1,7 @@
 token_set = {
     "instruction" : [
         # General purpose instructions
-        "move", "cadd", "load", "store", "insert", 
+        "cmove", "cadd", "load", "store", "insert", 
         # Arithmatic instructions
         "shift", "add", "sub", "mul", "longmul", "divide", "mod", 
         # Logic instructions
