@@ -31,8 +31,8 @@ xor zero zero zero
 add r3 r1 r2
 
 // set these two values as the result for next iteration
-move r1 r2 always
-move r2 r3 always
+cmove r1 r2 always
+cmove r2 r3 always
 
 // increment loop counter
 add r6 r6 buffer
@@ -50,7 +50,7 @@ nor zero zero zero
 sub zero r5 r6
 
 // loop back again if unsigned-higher (r5 > r6)
-move progc address uhigher
+cmove progc address uhigher
 
 
 
