@@ -1,62 +1,22 @@
-// **********************************************************************
-// begin with setting some init values 
-//
-
-// use r5 as end loop point, as loop from 2 until 47
-insert r5 47
-
-// use r6 as loop counter
-insert r6 2
-
-// want this loop to increment by 1
-insert buffer 1
-
-// set loop point to return progc back here
-insert address 6 
-
-// fibbonacically add r1 r2, start counting at 0 and 1
-insert r1 0
+// Initializing 
+insert r5 47            // use r5 as end loop point, as loop from 2 until 47
+insert r6 2             // use r6 as loop counter
+insert buffer 1         // want this loop to increment by 1
+insert address 6        // set loop point to return progc back here
+insert r1 0             // two start values, r1 and r2
 insert r2 1
 
 
+// LOOP at address 6 
+flag reset              // reset flag from previous loop comparison
+add r3 r1 r2            // add values fibbonacically
+move r1 r2              // set these two values as the result for next iteration
+move r2 r3
+add r6 r6 buffer        // increment loop counter
 
-// **********************************************************************
-// let's start adding numbers
-//
+flag on                 // turn flag on for looping comparison
+sub zero r5 r6          // compare r5 - r6, i.e. trying to do unsigned comparison
+cmove progc address uhigher // loop back again if unsigned-higher (r5 > r6)
 
-// reset flag from previous loop comparison
-xor zero zero zero
-
-// add values fibbonacically
-add r3 r1 r2
-
-// set these two values as the result for next iteration
-cmove r1 r2 always
-cmove r2 r3 always
-
-// increment loop counter
-add r6 r6 buffer
-
-
-
-// **********************************************************************
-// looping the prog counter back
-//
-
-// turn flag on for looping comparison
-nor zero zero zero
-
-// set flag = r5 - r6, i.e. trying to do unsigned comparison
-sub zero r5 r6
-
-// loop back again if unsigned-higher (r5 > r6)
-cmove progc address uhigher
-
-
-
-// **********************************************************************
-// finished
-//
-
-// write value at location 0
-store r3 zero 0
+// Finished
+store r3 zero 0         // write value at location 0
