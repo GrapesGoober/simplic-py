@@ -1,4 +1,4 @@
-import aofs, intelhex, os
+import assembler, intelhex, os
 
 def to_hexfile(asm_filepath : str) -> None:
 
@@ -7,7 +7,7 @@ def to_hexfile(asm_filepath : str) -> None:
         for asm_line in asm_file:
             asm_line = asm_line.strip().split("//")[0]
             if asm_line == "": continue
-            bincode = aofs.parse_line(asm_line)
+            bincode = assembler.parse_line(asm_line)
             bincodes_list.append(bincode >> 8)
             bincodes_list.append(bincode & 0xFF)
 
