@@ -1,6 +1,6 @@
 from assembler.token_set import token_set
 
-# Parse a mnemonic into integer code (essentially just an index-of)
+# Parse a mnemonic into binary code (essentially just an index-of)
 def parse_mnemonic(token : str, token_type : str) -> int:
 
     if token_type not in token_set:
@@ -32,44 +32,36 @@ def parse_immediate(token : str, bit_size : int) -> int:
 
     return result
 
-# Parses a line of assembly to integer code
+# Parses a line of assembly to binary code
 def parse_line(asmline : str) -> int:
 
-    # firstly, handle comma split into header and operands
-    asmline = asmline.strip()
-    tokens = asmline.split()
+    # split the line into tokens, 
+    # but also add some empty padding tokens for indexing
+    tokens = asmline.split() + [""] * 4
 
-    # next, parse the header (the opcode and destination register)
+    # firstly, parse the opcode and destination register
     opcode = parse_mnemonic(tokens[0], "instruction")
-    rd = parse_mnemonic(tokens[1], "register") << 8
-
+    rd = parse_mnemonic(tokens[1], "register") 
+    
     # next, parse the operands
-    # parsing operands are finicky; syntax is specific to opcode
-
-    # start with conditionals ("move" and "cadd")
-    if opcode in [0, 1]:
-        rn = parse_mnemonic(tokens[2], "register")
-        cnd = parse_mnemonic(tokens[3], "condition")
-        operands = (rn << 4) + cnd
-    # next, do memory instructions ("load" and "store")
-    elif opcode in [2, 3]:
-        rn = parse_mnemonic(tokens[2], "register")
-        imm4 = parse_immediate(tokens[3], 4)
-        operands = (rn << 4) + imm4
-    # insert instruction takes 8-bit immediate
-    elif opcode == 4:
-        imm8 = parse_immediate(tokens[2], 8)
-        operands = imm8
-    # shift instruction takes a special "shift operation" token type
-    elif opcode == 5:
-        shiftop = parse_mnemonic(tokens[2], "shift operation")
-        distance = parse_mnemonic(tokens[3], "register")
-        operands = (shiftop << 4) + distance
-    # rest ALU instructions take registers
-    else:
-        rn = parse_mnemonic(tokens[2], "register")
-        rm = parse_mnemonic(tokens[3], "register")
-        operands = (rn << 4) + rm
+    operands = 0
+    # parsing operands are finicky since syntax is specific to opcode
+    if opcode == 0: # start with conditional move "cmove"
+        operands += parse_mnemonic(tokens[2], "register") << 4
+        operands += parse_mnemonic(tokens[3], "condition")
+    elif opcode == 1: # count leading zeros 
+        operands += parse_mnemonic(tokens[2], "register") << 4
+    elif opcode in [2, 3]: # memory instructions ("load" and "store")
+        operands += parse_mnemonic(tokens[2], "register") << 4
+        operands += parse_immediate(tokens[3], 4)
+    elif opcode == 4: # insert instruction takes 8-bit immediate
+        operands += parse_immediate(tokens[2], 8)
+    elif opcode == 5: # shift instruction takes a special "shift operation" token type
+        operands += parse_mnemonic(tokens[2], "shift operation") << 4
+        operands += parse_mnemonic(tokens[3], "register")
+    else: # rest ALU instructions take registers
+        operands += parse_mnemonic(tokens[2], "register") << 4
+        operands += parse_mnemonic(tokens[3], "register")
 
     bincode = (opcode << 12) + (rd << 8) + operands
 

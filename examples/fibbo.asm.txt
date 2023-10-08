@@ -15,8 +15,8 @@ insert buffer 1
 insert address 6 
 
 // fibbonacically add r1 r2, start counting at 0 and 1
-insert r1, 0
-insert r2, 1
+insert r1 0
+insert r2 1
 
 
 
@@ -25,17 +25,17 @@ insert r2, 1
 //
 
 // reset flag from previous loop comparison
-xor zero, zero zero
+xor zero zero zero
 
 // add values fibbonacically
-add r3, r1 r2
+add r3 r1 r2
 
 // set these two values as the result for next iteration
-cmove r1, r2 always
-cmove r2, r3 always
+cmove r1 r2 always
+cmove r2 r3 always
 
 // increment loop counter
-add r6, r6 buffer
+add r6 r6 buffer
 
 
 
@@ -44,13 +44,13 @@ add r6, r6 buffer
 //
 
 // turn flag on for looping comparison
-nor zero, zero zero
+nor zero zero zero
 
 // set flag = r5 - r6, i.e. trying to do unsigned comparison
-sub zero, r5 r6
+sub zero r5 r6
 
 // loop back again if unsigned-higher (r5 > r6)
-cmove progc, address uhigher
+cmove progc address uhigher
 
 
 
@@ -59,4 +59,4 @@ cmove progc, address uhigher
 //
 
 // write value at location 0
-store r3, zero 0
+store r3 zero 0
