@@ -6,7 +6,6 @@ def to_hexfile(asm_filepath : str) -> None:
     with open(asm_filepath, mode = "r") as asm_file:
         asmcodes = asm_file.readlines()
     bytecodes = assembler.parse(asmcodes)
-
     hex_filepath = os.path.splitext(asm_filepath)[0] + ".hex"
     ih = intelhex.IntelHex()
     ih.fromdict(bytecodes)
