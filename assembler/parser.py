@@ -5,7 +5,7 @@ def parse_mnemonic(token : str, token_type : str) -> int:
 
     if token_type not in token_set:
         print(f"Error: Token type {token_type} does not exist.")
-        return False
+        return
         
     token_list = token_set[token_type]
     if token.lower() in token_list:
@@ -13,10 +13,10 @@ def parse_mnemonic(token : str, token_type : str) -> int:
         return token_index
     elif token == "":
         print(f"Error: Expected a {token_type} before newline.")
-        return False
+        return
     else:
         print(f"Error: Unrecognized {token_type} '{token}'.")
-        return False
+        return
 
 # Parse an immediate into integer with the specified bitsize
 def parse_immediate(token : str, bit_size : int) -> int:
@@ -24,7 +24,7 @@ def parse_immediate(token : str, bit_size : int) -> int:
     result = 0
     if token == "":
         print(f"Error: Expected a {bit_size}-bit immediate.")
-        return False
+        return
     try:
         if token.lower().startswith("0x"):
             result = int(token, 16)
@@ -34,11 +34,11 @@ def parse_immediate(token : str, bit_size : int) -> int:
             result = int(token, 10)
     except ValueError:
         print(f"Error: Invalid immediate '{token}'.")
-        return False
+        return
 
     if result.bit_length() > bit_size:
         print(f"Error: Immediate value '{token}' too big for {bit_size} bits.")
-        return False
+        return
     
     return result
 
@@ -62,7 +62,7 @@ def parse_instruction(asmline : str) -> list[int]:
         operandB += parse_mnemonic(tokens[2], "register")
         if tokens[3] != "": 
             print(f"Error: Unexpected operand '{tokens[3]}'")
-            return False
+            return
     elif opcode in [2, 3]: # memory instructions ("load" and "store")
         operandA = parse_mnemonic(tokens[2], "register")
         operandB = parse_immediate(tokens[3], 4)
@@ -70,7 +70,7 @@ def parse_instruction(asmline : str) -> list[int]:
         operandB += parse_immediate(tokens[2], 8)
         if tokens[3] != "": 
             print(f"Error: Unexpected operand '{tokens[3]}'")
-            return False
+            return
     elif opcode == 5: # shift instruction takes a special "shift operation" token type
         operandA = parse_mnemonic(tokens[2], "shift operation")
         operandB = parse_mnemonic(tokens[3], "register")
@@ -80,10 +80,10 @@ def parse_instruction(asmline : str) -> list[int]:
 
     if tokens[4] != "": 
         print(f"Error: Unexpected operand '{tokens[4]}'")
-        return False
+        return
     
-    if any(i is False for i in [opcode, rd, operandA, operandB]):
-        return False
+    if None in [opcode, rd, operandA, operandB]:
+        return
 
     return [(opcode << 4) + rd, (operandA << 4) + operandB]
 
@@ -105,7 +105,7 @@ def parse(asmlines : list[str]) -> dict[str: int]:
             result = parse_instruction(f"cmove {tokens[1]} {tokens[2]} always") 
             if tokens[3] != "":
                 print(f"Error: Unexpected token '{tokens[3]}'")
-                return False
+                return
         elif tokens[0].lower() == "flag":
             if tokens[1].lower() == "on":
                 result = parse_instruction("nor zero zero zero")
@@ -113,10 +113,10 @@ def parse(asmlines : list[str]) -> dict[str: int]:
                 result = parse_instruction("xor zero zero zero")
             else:
                 print(f"Error: Unrecognized flag directive '{tokens[1]}'")
-                return False
+                return
             if tokens[2] != "":
                 print(f"Error: Unexpected token '{tokens[3]}'")
-                return False
+                return
         else:
             result = parse_instruction(asmline)
 
@@ -124,6 +124,6 @@ def parse(asmlines : list[str]) -> dict[str: int]:
             bytecodes += result
         else:    
             print(f"Error: Assembler error at line {i+1}\n\t {asmline}")
-            return False
+            return
         
     return { i: v for i, v, in enumerate(bytecodes) }
