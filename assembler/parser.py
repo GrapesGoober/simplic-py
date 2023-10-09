@@ -91,24 +91,26 @@ def parse(asmlines : list[str]) -> dict[str: int]:
         tokens = asmline.split() + [""] * 4
 
         # try parsing the code
+        status, result = False, None
         if tokens[0].lower() == "move":
-            if tokens[3] != "":
-                return False, f"Unexpected token '{tokens[3]}'"
             bytecodes += parse_instruction(f"cmove {tokens[1]} {tokens[2]} always") 
+            if tokens[3] != "":
+                status, result = False, f"Unexpected token '{tokens[3]}'"
         elif tokens[0].lower() == "flag":
-            if tokens[2] != "":
-                return False, f"Unexpected token '{tokens[2]}'"
             if tokens[1].lower() == "on":
-                bytecodes += parse_instruction("nor zero zero zero")
+                status, result = parse_instruction("nor zero zero zero")
             elif tokens[1].lower() == "reset":
-                bytecodes += parse_instruction("xor zero zero zero")
+                status, result = parse_instruction("xor zero zero zero")
             else:
-                return False, f"Unrecognized flag directive {tokens[1]}"
+                status, result = False, f"Unrecognized flag directive {tokens[1]}"
+            if tokens[2] != "":
+                status, result = False, f"Unexpected token '{tokens[2]}'"
         else:
             bytecodes += parse_instruction(asmline)
 
-        return False, f"Assembler error at line {i+1}: {ve.args[0]}"
-
-            
-
+        if status:
+            bytecodes += result
+        else:    
+            return {False: f"Assembler error at line {i+1}: {result}"}
+        
     return { i: v for i, v, in enumerate(bytecodes) }
