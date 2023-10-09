@@ -1,7 +1,7 @@
 from assembler.token_set import token_set
 
 # Parse a mnemonic into binary code (essentially just an index-of)
-def parse_mnemonic(token : str, token_type : str) -> int or str:
+def parse_mnemonic(token : str, token_type : str) -> int:
 
     if token_type not in token_set:
         print(f"Error: Token type {token_type} does not exist.")
