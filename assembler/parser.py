@@ -150,9 +150,7 @@ def parse(asmlines : list[str]) -> dict[str: int]:
         dest_msb = goto_labels[label.lower()] >> 8
         dest_lsb = goto_labels[label.lower()] & 0xFF
         
-        # TODO: refactor Simplic.dig to be 16 bits
-        insert_instruction = parse_instruction(f"cmove address zero always")
-        #insert_instruction = parse_instruction(f"insert address {dest_msb}")
+        insert_instruction = parse_instruction(f"insert address {dest_msb}")
         insert_instruction += parse_instruction(f"insert address {dest_lsb}")
         bytecodes[address: address + 4] = insert_instruction
         

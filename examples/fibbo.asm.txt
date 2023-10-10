@@ -1,5 +1,5 @@
 // Initializing 
-insert r5 47            // use r5 as end loop point, as loop from 2 until 47
+insert r5 24            // use r5 as end loop point, as loop from 2 until 24
 insert r6 2             // use r6 as loop counter
 insert buffer 1         // want this loop to increment by 1
 insert r1 0             // two start values, r1 and r2
