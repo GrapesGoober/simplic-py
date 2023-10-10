@@ -2124,7 +2124,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>SP</string>
+          <string>STA</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -2138,7 +2138,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>BR</string>
+          <string>Addr</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -2152,7 +2152,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>LR</string>
+          <string>Link</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -2827,7 +2827,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>ZR</string>
+          <string>Zero</string>
         </entry>
         <entry>
           <string>RectWidth</string>
@@ -3151,7 +3151,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RA</string>
+          <string>BUF</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -3165,7 +3165,7 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>RB</string>
+          <string>RET</string>
         </entry>
         <entry>
           <string>Bits</string>
@@ -5151,7 +5151,7 @@
       <elementAttributes>
         <entry>
           <string>Description</string>
-          <string>Buffer Register</string>
+          <string>Address Register</string>
         </entry>
       </elementAttributes>
       <pos x="1120" y="-100"/>
@@ -5383,6 +5383,36 @@
         </entry>
       </elementAttributes>
       <pos x="-2860" y="-300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Text</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Description</string>
+          <string>Return Register</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1120" y="-340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Text</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Description</string>
+          <string>Buffer Register</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1120" y="-460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Text</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Description</string>
+          <string>Program Counter</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1120" y="140"/>
     </visualElement>
   </visualElements>
   <wires>
