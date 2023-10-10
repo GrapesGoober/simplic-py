@@ -2,12 +2,12 @@
 insert r5 47            // use r5 as end loop point, as loop from 2 until 47
 insert r6 2             // use r6 as loop counter
 insert buffer 1         // want this loop to increment by 1
-insert address 6        // set loop point to return progc back here
 insert r1 0             // two start values, r1 and r2
 insert r2 1
 
 
 // LOOP at address 6 
+LABEL LOOP
 flag reset              // reset flag from previous loop comparison
 add r3 r1 r2            // add values fibbonacically
 move r1 r2              // set these two values as the result for next iteration
@@ -16,7 +16,7 @@ add r6 r6 buffer        // increment loop counter
 
 flag on                 // turn flag on for looping comparison
 sub zero r5 r6          // compare r5 - r6, i.e. trying to do unsigned comparison
-cmove progc address uhigher // loop back again if unsigned-higher (r5 > r6)
+goto LOOP uhigher       // loop back again if unsigned-higher (r5 > r6)
 
 // Finished
 store r3 zero 0         // write value at location 0

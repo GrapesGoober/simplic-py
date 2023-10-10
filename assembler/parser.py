@@ -90,6 +90,9 @@ def parse_instruction(asmline : str) -> list[int]:
 def parse(asmlines : list[str]) -> dict[str: int]:
 
     bytecodes = []
+    goto_labels = {} # "label" : address (true bincode)
+    goto_instructions = {} # address (bytecode) : "label"
+    constants = {}
 
     for i, asmline in enumerate(asmlines):
         # remove comments and empty lines
@@ -115,6 +118,19 @@ def parse(asmlines : list[str]) -> dict[str: int]:
                 print(f"Error: Unrecognized flag directive '{tokens[1]}'")
                 return
             if tokens[2] != "":
+                print(f"Error: Unexpected token '{tokens[2]}'")
+                return
+        elif tokens[0].lower() == "label":
+            goto_labels[tokens[1].lower()] = len(bytecodes) // 2
+            if tokens[2] != "":
+                print(f"Error: Unexpected token '{tokens[2]}'")
+                return
+            continue
+        elif tokens[0].lower() == "goto":
+            goto_instructions[len(bytecodes)] = tokens[1]
+            result = [0, 0, 0, 0] # empty insert-address instructions
+            result += parse_instruction(f"cmove progc address {tokens[2]}")
+            if tokens[3] != "":
                 print(f"Error: Unexpected token '{tokens[3]}'")
                 return
         else:
@@ -125,5 +141,20 @@ def parse(asmlines : list[str]) -> dict[str: int]:
         else:    
             print(f"Error: Assembler error at line {i+1}\n\t {asmline}")
             return
+        
+    for address in goto_instructions:
+        label = goto_instructions[address]
+        if label.lower() not in goto_labels:
+            print(f"Error: Undefined branch label {label}")
+            return
+        dest_msb = goto_labels[label.lower()] >> 8
+        dest_lsb = goto_labels[label.lower()] & 0xFF
+        
+        # TODO: refactor Simplic.dig to be 16 bits
+        insert_instruction = parse_instruction(f"cmove address zero always")
+        #insert_instruction = parse_instruction(f"insert address {dest_msb}")
+        insert_instruction += parse_instruction(f"insert address {dest_lsb}")
+        bytecodes[address: address + 4] = insert_instruction
+        
         
     return { i: v for i, v, in enumerate(bytecodes) }
