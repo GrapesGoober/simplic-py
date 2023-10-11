@@ -25,10 +25,10 @@ token_set = {
     "condition" : [
         "zero",
         "notzero",
-        "carry",
-        "notcarry",
         "negative",
         "positive",
+        "carry",
+        "notcarry",
         "overflow",
         "notoverflow",
         "usmaller",     # unsigned, Z or C
