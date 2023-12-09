@@ -1,12 +1,3 @@
-# Simplic Microcontroller - Author Nachat K (grapsgoober)
-# This is an implementation of Simplic, a 16-bit accumulator-based microcontroller. 
-
-class Memory:
-    words = {}
-    def read(self, address):
-        return self.words[address] if address in self.words else 0
-    def write(self, address, value):
-        self.words[address] = value
 
 class SimplicCore:
     BITSIZE = 16
@@ -16,8 +7,8 @@ class SimplicCore:
     Z, N, C, V = 0, 0, 0, 0
 
     # Mux & Signal bus
-    result_mux = {i:0 for i in range(16)}
-    constrol_signals = {}
+    result_mux : dict = {i:0 for i in range(16)}
+    constrol_signals : dict = {}
 
     def decode(self, opcode, control):
         pass
