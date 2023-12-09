@@ -1,1 +1,1 @@
-from Microcontroller import SimplicCore, Memory
+from microcontroller import SimplicCore, Memory
