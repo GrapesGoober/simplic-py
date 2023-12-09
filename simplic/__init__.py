@@ -1,1 +1,0 @@
-from microcontroller import SimplicCore, Memory
