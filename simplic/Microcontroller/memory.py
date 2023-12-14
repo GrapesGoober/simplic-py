@@ -1,24 +1,23 @@
-import json
-
 class Memory:
-    BIT_SIZE = 16
-    _words: dict = {}
-
-    def __init__(self, filename: str):
-        with open(filename, 'r') as f:
-            self._words = json.load(f)
-
-        self._words = {int(key): int(value) for key, value in self._words.items()}
-
-        for i, v in self._words.items():
-            if i > (2 ** self.BIT_SIZE):
-                raise Exception(f'Address {i} too large for {self.BIT_SIZE} bits')
-            if v > (2 ** self.BIT_SIZE):
-                raise Exception(f'Value {v} too large for {self.BIT_SIZE} bits')
+    
+    def __init__(self) -> None:
+        self.MASK = 0xFFFF
+        self.__words = {}
 
     def read(self, address: int) -> int:
-        return self._words[address] if address in self._words else 0
+        return self.__words[address] if address in self._words else 0
     
     def write(self, address: int, value: int) -> None:
-        self._words[address] = value & (2 ** self.BIT_SIZE)
-
+        self.__words[address] = value & self.MASK
+        
+    def load(self, filename: str) -> None:
+        with open(filename, 'r') as f:
+            words = f.read().split()
+            self._words = {}
+            for i, v in enumerate(words):
+                v = int(v, 16)
+                if i > self.MASK:
+                    raise Exception("Can't load (file too large)")
+                if v > self.MASK:
+                    raise Exception("Can't load (value overflow)")
+                self._words[i] = v
