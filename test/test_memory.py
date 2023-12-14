@@ -1,19 +1,26 @@
-
 # Add the parent directory to the Python path
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from simplic.microcontroller.memory import Memory
+import random, math
 
-import json, random
-def generate_random_dict():
-    bytes_dict = {i: random.randint(0, 2**16) for i in range(300)}
-    with open("test\sample.json", 'w') as f:
-        json.dump(bytes_dict, f, indent=2)
+filename = "test\sample.hex"
+width = 16
+WORDSIZE = 16
+
+def generate_random_hex():
+    with open(filename, 'w') as f:
+        hex_digit = math.ceil(WORDSIZE / 4)
+        for i in range(300):
+            r = random.randint(0, 2**16)
+            f.write(f"{r:0{hex_digit}x} ")
+            if (i + 1) % width == 0:
+                f.write("\n")
+
 
 if __name__ == '__main__':
 
-    # generate_random_dict()
+    #generate_random_hex()
 
-    m = Memory("test\sample.json")
-    print(m.read(296))
+    m = Memory()
+    m.load(filename)
