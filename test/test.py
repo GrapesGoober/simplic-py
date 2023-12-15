@@ -1,7 +1,7 @@
 # Add the parent directory to the Python path
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from simplic.microcontroller.memory import Memory
+from simplic.microcontroller import SimplicMicrocontroller
 import random, math
 
 filename = "test\sample.hex"
@@ -20,7 +20,6 @@ def generate_random_hex():
 
 if __name__ == '__main__':
 
-    #generate_random_hex()
-
-    m = Memory()
-    m.load(filename)
+    mc = SimplicMicrocontroller()
+    mc.load_program(filename)
+    [print(f"{mc.instructions[i]:04x}") for i in range(300)]
