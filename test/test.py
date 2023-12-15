@@ -23,8 +23,3 @@ if __name__ == '__main__':
     mc = SimplicMicrocontroller()
     mc.load_program(filename)
     mc.run()
-
-    # number = 0
-    # incremented = number + 0xFFFE
-    # masked = incremented & 0xFFFF
-    # print(masked)
