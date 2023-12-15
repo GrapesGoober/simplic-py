@@ -1,65 +1,55 @@
+from .memory import Memory
 
 class SimplicCore:
 
     def __init__(self, word_size: int = 16) -> None:
         self.WORDSIZE = word_size
         self.MASK = 2 ** word_size - 1
-        self.ACC, self.BSP, self.PC = 0, 0, 0
+
+        self.PC, self.ACC, self.P = 0, 0, 0
+        self.BSP = self.MASK # call stack starts counting from 0xFF..FF, unlike heap
         self.flags = {}
         self.ctrl_bus = {}
     
-    def execute(self, instruction: int, memory_word: int):
+    def execute(self, instructionMemory: Memory, mainMemory: Memory):
+
+        # unpack and decode the instruction word
+        instruction = instructionMemory.read(self.PC)
         opcode = (instruction >> 12) & 0xF
         control = (instruction >> 8) & 0xF
         imm8 = (instruction >> 0) & 0xFF
-        
         self.decode(opcode, control)
 
+        # specify addressing mode using C1 control bit, then read from memory
+        usePointer = self.ctrl_bus["C1"]
+        address = self.P + imm8 if usePointer else self.BSP - imm8
+        memData = mainMemory.read(address & self.MASK)
+
     def decode(self, opcode: int, control: int) -> None:
-        # conditions bits (for jump) are the same as the control bits
+
+        # conditions bits (for jump) are identical as the control bits
         self.ctrl_bus["COND"] = control
 
-        # unpack individual control bits from MSB to LSB
-        self.ctrl_bus["CARRY"]  = (control >> 3) & 0b1
-        self.ctrl_bus["SIGN"]   = (control >> 3) & 0b1
-        self.ctrl_bus["NEG"]    = (control >> 3) & 0b1
-        self.ctrl_bus["SFT"]    = (control >> 2) & 0b11
-        self.ctrl_bus["BSP/P"]  = (control >> 2) & 0b1
-        self.ctrl_bus["IMM8"]   = (control >> 0) & 0b1
+        # certain control bits can be assigned without decoding
+        self.ctrl_bus["C0"] = (control >> 3) & 0b1
+        self.ctrl_bus["C1"] = (control >> 2) & 0b1
+        self.ctrl_bus["SFT2"] = (control >> 2) & 0b11
 
-        # decode the flag control signals (c & v flags only enabled for ADD 0x7 and SUB 0x8)
-        # note that 
+        # decode memory write enable for STORE instruction
+        self.ctrl_bus["MEM EN"] = opcode == 0x2
+
+        # decode the flag control signals (c & v flags only enabled for ADD/SUB instructions)
         f = (control >> 1) & 0b1
-        self.ctrl_bus["ZN EN"] = f and opcode > 0x3
+        self.ctrl_bus["ZN EN"] = f and opcode >= 0x5
         self.ctrl_bus["CV EN"] = f and opcode in (0x7, 0x8) 
-        self.ctrl_bus["CV CLEAR"] = f and opcode not in (0x7, 0x8)
 
-        # decode operand A/P control signal
+        # decode immediate control bit
+        i = control & 0b1
+        self.ctrl_bus["IMM8"] = (i and opcode >= 0x6) or opcode in (0x0, 0x3)
 
-    def compute(self, opcode: int, A: int, B: int) -> None:
-        match opcode:
-            case 0x0:
-                pass
-            case 0x1:
-                pass
-            case 0x2:
-                pass
-            case 0x3:
-                pass
-            case 0x4:
-                pass
-            case 0x5:
-                pass
-            case 0x6:
-                pass
-            case 0x7: result = A + B
-            case 0x8: result = A - B
-            case 0x9: result = A * B
-            case 0xA: result = A * B >> self.WORDSIZE
-            case 0xB: result = A // B
-            case 0xC: result = A % B
-            case 0xD: result = A & B
-            case 0xE: result = A | B
-            case 0xF: result = ~A + self.ctrl_bus["NEG"]
+        # decode destination select bit
+
+        # decode jump enable signal
+        self.ctrl_bus["JMP EN"] = opcode == 0x4
 
         
