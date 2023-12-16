@@ -1,7 +1,6 @@
 class SimplicMicrocontroller:
 
     def __init__(self, word_size: int = 16) -> None:
-        self.WORDSIZE       = word_size
         self.MASK           = 2 ** word_size - 1
         self.instructions   = {i: 0 for i in range(2 ** word_size)}
         self.memory         = {i: 0 for i in range(2 ** word_size)}
