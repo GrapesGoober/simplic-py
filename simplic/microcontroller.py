@@ -1,32 +1,24 @@
 class SimplicMicrocontroller:
 
     def __init__(self, word_size: int = 16) -> None:
-        self.WORDSIZE = word_size
-        self.MASK = 2 ** word_size - 1
-        self.instructions = {i: 0 for i in range(2 ** word_size)}
-        self.memory = {i: 0 for i in range(2 ** word_size)}
-        # setting up memory mapped registers
-        self.memory[0] = 0            # PC - Program Counter
-        self.memory[1] = 0            # A  - Accumulator 
-        self.memory[2] = self.MASK    # P  - Stack Pointer (count reverse)
+        self.WORDSIZE       = word_size
+        self.MASK           = 2 ** word_size - 1
+        self.instructions   = {i: 0 for i in range(2 ** word_size)}
+        self.memory         = {i: 0 for i in range(2 ** word_size)}
+        self.memory[2]      = self.MASK    # Stack Pointer count reverses
 
     def load_program(self, filename: str) -> None:
         with open(filename, 'r') as f:
-            instructions = f.read().split()
-            for i, v in enumerate(instructions):
-                v = int(v, 16)
-                if i > self.MASK or v > 0xFF:
-                    raise Exception("Can't load program; exceeded size limit")
-                self.instructions[i] = v
+            for i, v in enumerate(f.read().split()):
+                self.instructions[i] = int(v, 16) & 0xFF
 
     def execute(self) -> None:
         mem = self.memory
         instruction = self.instructions[mem[0x0]]
+
         opcode, I = instruction >> 4, instruction & 0xF
-        A = mem[1] & self.MASK
-        P = mem[2] & self.MASK
-        V = mem[P - I] & self.MASK
-        PC = mem[0] & self.MASK
+        PC, A, P = mem[0], mem[1], mem[2]
+        V = mem[P - I]
 
         match opcode:
             case 0x0: A = V             # Load
@@ -37,10 +29,10 @@ class SimplicMicrocontroller:
             case 0x5: PC = V - 1        # Jump
             case 0x9: A += V            # Add
 
-        mem[1] = A & self.MASK
-        mem[2] = P & self.MASK
-        mem[P - I] = V & self.MASK
-        mem[0] = PC + 1 & self.MASK
+        mem[0]      = PC + 1    & self.MASK
+        mem[1]      = A         & self.MASK
+        mem[2]      = P         & self.MASK
+        mem[P - I]  = V         & self.MASK
 
     def run(self) -> None:
         while self.memory[0x0] < 0xFFFF:
