@@ -21,12 +21,21 @@ class SimplicMicrocontroller:
 
         match opcode:
             case 0x0: A = V             # Load
-            case 0x1: V = A             # Store
-            case 0x2: V = mem[V]        # Load Pointer
-            case 0x3: A = A << 4 | I    # Insert
-            case 0x4: PC += A == V      # Compare
-            case 0x5: PC = V - 1        # Jump
-            case 0x9: A += V            # Add
+            case 0x1: V, A = A, 0       # Store
+            case 0x2: A = mem[V]        # Load Pointer
+            case 0x3: mem[V] = A        # Store Pointer
+            case 0x4: A = A << 4 | I    # Insert
+            case 0x5: pass              # Jump PC = V - 1
+            case 0x6: pass              # Compare PC += A == V
+            case 0x7: pass              
+            case 0x8: pass              # Count LZ
+            case 0x9: V += A            # Add
+            case 0xA: V -= A            # Sub
+            case 0xB: V *= A            # Mul
+            case 0xC: V //= A           # Div
+            case 0xD: V &= A            # And
+            case 0xE: V |= A            # Or
+            case 0xF: V = ~V            # Not
 
         mem[0]      = PC + 1    & self.MASK
         mem[1]      = A         & self.MASK
