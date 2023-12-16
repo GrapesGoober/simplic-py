@@ -23,32 +23,36 @@ class SimplicMicrocontroller:
         mem = self.memory
         instruction = self.instructions[mem[0x0]]
         opcode, I = instruction >> 4, instruction & 0xF
-        A, P = mem[1] & self.MASK, mem[2] & self.MASK
+        A = mem[1] & self.MASK
+        P = mem[2] & self.MASK
         V = mem[P - I] & self.MASK
+        PC = mem[0] & self.MASK
 
         match opcode:
-            case 0x0: mem[1] = V            # Load
-            case 0x1: mem[P - I] = A        # Store
-            case 0x2: mem[P - I] = mem[V]   # Load Pointer
-            case 0x3: mem[1] = A << 4 | I   # Insert
-            case 0x4: mem[0] += A == V      # Compare
-            case 0x5: mem[0] = V - 1        # Jump
-            case 0x9: mem[1] += V           # Add
+            case 0x0: A = V             # Load
+            case 0x1: V = A             # Store
+            case 0x2: V = mem[V]        # Load Pointer
+            case 0x3: A = A << 4 | I    # Insert
+            case 0x4: PC += A == V      # Compare
+            case 0x5: PC = V - 1        # Jump
+            case 0x9: A += V            # Add
 
-        PC = mem[0] & self.MASK
+        mem[1] = A & self.MASK
+        mem[2] = P & self.MASK
+        mem[P - I] = V & self.MASK
         mem[0] = PC + 1 & self.MASK
 
     def run(self) -> None:
         while self.memory[0x0] < 100:
             self.execute()
-            print("internal state")
-            for i in range(3):
-                print(f"{i}\t{self.memory[i]}")
+        print("internal state")
+        for i in range(3):
+            print(f"{i}\t{self.memory[i]}")
 
-            print("stack")
-            for i in range(0xF):
-                P = self.memory[2]
-                print(f"{i:0x}\t{self.memory[P - i]}")
+        print("stack")
+        for i in range(0xF):
+            P = self.memory[2]
+            print(f"{i:0x}\t{self.memory[P - i]}")
 
 
 
