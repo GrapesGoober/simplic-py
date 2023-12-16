@@ -43,7 +43,7 @@ class SimplicMicrocontroller:
         mem[0] = PC + 1 & self.MASK
 
     def run(self) -> None:
-        while self.memory[0x0] < 100:
+        while self.memory[0x0] < 0xFFFF:
             self.execute()
         print("internal state")
         for i in range(3):
