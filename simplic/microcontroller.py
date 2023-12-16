@@ -29,13 +29,13 @@ class SimplicMicrocontroller:
             case 0x6: pass              # Compare PC += A == V
             case 0x7: pass              
             case 0x8: pass              # Count LZ
-            case 0x9: V += A            # Add
-            case 0xA: V -= A            # Sub
-            case 0xB: V *= A            # Mul
-            case 0xC: V //= A           # Div
-            case 0xD: V &= A            # And
-            case 0xE: V |= A            # Or
-            case 0xF: V = ~V            # Not
+            case 0x9: A +=  V           # Add
+            case 0xA: A -=  V           # Sub
+            case 0xB: A *=  V           # Mul
+            case 0xC: A //= V           # Div
+            case 0xD: A &=  V           # And
+            case 0xE: A |=  V           # Or
+            case 0xF: A =  ~V           # Not
 
         mem[0]      = PC + 1    & self.MASK
         mem[1]      = A         & self.MASK
