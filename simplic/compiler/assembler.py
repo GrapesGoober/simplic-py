@@ -1,3 +1,7 @@
+INSTRUCTIONS = [
+    "load", "store", "loadp", "storep", "insert", "compare", "jump", "clz",
+    "?", "add", "sub", "mul", "div", "and", "or", "not"
+]
 
 def literal_to_int(token: str) -> int:
     BITSIZE = 4
@@ -15,13 +19,10 @@ def literal_to_int(token: str) -> int:
     return result
 
 def asm_to_dict(source: str) -> dict:
-    asm = {
-        "variables": {},
-        "start": []
-    }
+    asm = { "start": [] }
     current_label = "start"
     with open(source, 'r') as f:
-        for line in f:
+        for i, line in enumerate(f):
             
             # read line
             line = line.lower().strip().split('#')[0]
@@ -29,24 +30,21 @@ def asm_to_dict(source: str) -> dict:
 
             # capture current label
             if ':' in line:
-                assert line[-1] == ':', "Expect only a colon after label"
-                assert len(line.split()) == 1, "Expect a single label at a time"
+                assert line[-1] == ':', f"Line {i}, Expect only a colon after label"
+                assert len(line.split()) == 1, f"Line {i}, Expect only 1 label"
                 current_label = line[:-1]
                 continue
 
             # split code into individual tokens
-            assert len(line.split()) == 2, "Expect identifier followed by value"
+            assert len(line.split()) == 2, f"Line {i}, Expect identifier followed by value"
             tokens = line.split()
             
             # parse
             if current_label not in asm:
                 asm[current_label] = []
 
-            if current_label == "variables":
-                asm["variables"][tokens[0]] = literal_to_int(tokens[1])
-            else:
-                asm[current_label].append(tokens)
-
+            asm[current_label].append(tokens)
+            
     return asm
 
 def asm_to_hex(source: str, destination: str) -> None:
