@@ -9,11 +9,10 @@ start:
     store   3   
     insert  1   # 'increment' at 4
     store   4   
-    insert  1   # 'max' at 5
-    insert  8   #     count up to 24th fib
-    store   5   #     which is 0x18
+    insert  18  # 'max' at 5
+    store   5   #     count up to 24th fib (0x18)
 
-loop:  s
+loop:
     load    0   # next = previous + current    
     add     1
     store   2

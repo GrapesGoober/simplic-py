@@ -24,7 +24,7 @@ class SimplicMicrocontroller:
             case 0x1: V, A = A, 0       # Store
             case 0x2: A = mem[V]        # Load Pointer
             case 0x3: mem[V] = A        # Store Pointer
-            case 0x4: A = A << 4 | I    # Insert
+            case 0x4: A = A << 8 | I    # Insert
             case 0x5: pass              # Jump PC = A
             case 0x6: pass              # Compare PC += A == 0
             case 0x7: pass              
