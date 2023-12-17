@@ -1,3 +1,5 @@
+from .error_print import ErrorPrint
+
 INSTRUCTIONS = [
     "load", "store", "loadp", "storep", "insert", "compare", "jump", "clz",
     "?", "add", "sub", "mul", "div", "and", "or", "not"
@@ -19,29 +21,32 @@ def literal_to_int(token: str) -> int:
     return result
 
 def asm_to_dict(source: str) -> dict:
-    asm = { "start": [] }
-    current_label = "start"
+    asm, jump_points = {}, []
+    current_label, current_PC = "start", 0
     with open(source, 'r') as f:
         for i, line in enumerate(f):
-            
-            # read line
+            report = ErrorPrint(i, source).report
+
+            # read line and exclude comments
             line = line.lower().strip().split('#')[0]
             if not line: continue
 
             # capture current label
             if ':' in line:
-                assert line[-1] == ':', f"Line {i}, Expect only a colon after label"
-                assert len(line.split()) == 1, f"Line {i}, Expect only 1 label"
+                if len(line.split()) != 1: 
+                    report("Expect only one name for label")
                 current_label = line[:-1]
+                if current_label not in asm:
+                    asm[current_label] = [f"at PC = {current_PC}"]
                 continue
 
-            # split code into individual tokens
-            assert len(line.split()) == 2, f"Line {i}, Expect identifier followed by value"
+            # split code into individual tokens and parse
             tokens = line.split()
-            
-            # parse
-            if current_label not in asm:
-                asm[current_label] = []
+            if len(tokens) != 2:
+                report("Expect only an opcode and immediate")
+            if tokens[0] == INSTRUCTIONS[6]: 
+                current_PC += 3
+            else: current_PC += 1
 
             asm[current_label].append(tokens)
             
