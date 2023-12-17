@@ -9,13 +9,13 @@ class SimplicMicrocontroller:
     def load_program(self, filename: str) -> None:
         with open(filename, 'r') as f:
             for i, v in enumerate(f.read().split()):
-                self.instructions[i] = int(v, 16) & 0xFF
+                self.instructions[i] = int(v, 16) & 0xFFF
 
     def execute(self) -> None:
         mem = self.memory
         instruction = self.instructions[mem[0x0]]
 
-        opcode, I = instruction >> 4, instruction & 0xF
+        opcode, I = instruction >> 8, instruction & 0xFF
         PC, A, P = mem[0], mem[1], mem[2]
         V = mem[P - I]
 
