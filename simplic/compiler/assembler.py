@@ -21,8 +21,7 @@ def literal_to_int(token: str) -> int:
     return result
 
 def asm_to_dict(source: str) -> dict:
-    asm, jump_points = {}, []
-    current_label, current_PC = "start", 0
+    asm, current_label, current_PC = {}, "start", 0
     with open(source, 'r') as f:
         for i, line in enumerate(f):
             report = ErrorPrint(i, source).report
