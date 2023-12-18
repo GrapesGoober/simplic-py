@@ -30,7 +30,7 @@ class SimplicMicrocontroller:
 
         match opcode:
             case 0x0: A = V             # Load
-            case 0x1: V, A = A, 0       # Store
+            case 0x1: V = A             # Store
             case 0x2: A = mem[V]        # Load Pointer
             case 0x3: mem[V] = A        # Store Pointer
             case 0x4: V = set_data()    # Set
