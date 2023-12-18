@@ -19,6 +19,8 @@ class SimplicMicrocontroller:
         PC, A, P = mem[0], mem[1], mem[2]
         V = mem[P - I]
 
+        clz = lambda: len(f"{V:016b}".split('1')[0])
+
         match opcode:
             case 0x0: A = V             # Load
             case 0x1: V, A = A, 0       # Store
@@ -28,7 +30,7 @@ class SimplicMicrocontroller:
             case 0x5: pass              # Jump PC = A
             case 0x6: pass              # Compare PC += A == 0
             case 0x7: pass              
-            case 0x8: pass              # Count LZ
+            case 0x8: A = clz()         # Count LZ
             case 0x9: A +=  V           # Add
             case 0xA: A -=  V           # Sub
             case 0xB: A *=  V           # Mul
