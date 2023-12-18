@@ -1,16 +1,10 @@
 start:
-    insert  0   # 'previous' at 0
-    store   0   
-    insert  1   # 'current' at 1
-    store   1   
-    insert  0   # 'next' at 2
-    store   2   
-    insert  2   # 'counter' at 3
-    store   3   
-    insert  1   # 'increment' at 4
-    store   4   
-    insert  18  # 'max' at 5
-    store   5   #     count up to 24th fib (0x18)
+    set 0   0   # 'previous' at 0
+    set 1   1   # 'current' at 1
+    set 2   2   # 'next' at 2
+    set 3   2   # 'counter' at 3
+    set 4   1   # 'increment' at 4
+    set 5   24  # 'max' at 5
 
 loop:
     load    0   # next = previous + current    
