@@ -13,10 +13,10 @@ class SimplicMicrocontroller:
 
     def execute(self) -> None:
         mem = self.memory
-        instruction = self.instructions[mem[0x0]]
-
-        opcode, I = instruction >> 8, instruction & 0xFF
         PC, A, P = mem[0], mem[1], mem[2]
+        
+        bytecode = self.instructions[PC]
+        opcode, I = bytecode >> 8, bytecode & 0xFF
         V = mem[P - I]
 
         clz = lambda: len(f"{V:016b}".split('1')[0])
