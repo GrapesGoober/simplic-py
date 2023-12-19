@@ -1,10 +1,9 @@
 class SimplicMicrocontroller:
 
-    def __init__(self, word_size: int = 16) -> None:
-        self.MASK           = 2 ** word_size - 1
-        self.instructions   = {i: 0 for i in range(2 ** word_size)}
-        self.memory         = {i: 0 for i in range(2 ** word_size)}
-        self.memory[2]      = self.MASK    # Stack Pointer count reverses
+    def __init__(self) -> None:
+        self.instructions   = {i: 0 for i in range(0x10000)}
+        self.memory         = {i: 0 for i in range(0x10000)}
+        self.memory[2]      = 0xFFFF    # Stack Pointer count reverses
 
     def load_program(self, filename: str) -> None:
         with open(filename, 'r') as f:
@@ -46,10 +45,10 @@ class SimplicMicrocontroller:
             case 0xE: A |=  V           # Or
             case 0xF: A =  ~V           # Not           
 
-        mem[0]      = PC + 1    & self.MASK
-        mem[1]      = A         & self.MASK
-        mem[2]      = P         & self.MASK
-        mem[P - I]  = V         & self.MASK
+        mem[0]      = PC + 1    & 0xFFFF
+        mem[1]      = A         & 0xFFFF
+        mem[2]      = P         & 0xFFFF
+        mem[P - I]  = V         & 0xFFFF
 
     def run(self) -> None:
         while self.memory[0x0] < 0xFFFF:
