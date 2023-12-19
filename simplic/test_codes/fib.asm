@@ -22,5 +22,8 @@ loop:
     store   3
     jump    loop
 
+start:
+    jump loop
+
 
     

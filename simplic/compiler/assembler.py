@@ -35,14 +35,13 @@ def asm_to_dict(source: str) -> dict:
                 if len(line.split()) != 1: 
                     report("Expect only one name for label")
                 current_label = line[:-1]
-                if current_label not in asm:
-                    asm[current_label] = [f"at PC = {current_PC}"]
+                if current_label in asm:
+                    report(f"Duplicate label '{current_label}'")
+                asm[current_label] = [f"at PC = {current_PC}"]
                 continue
 
             # split code into individual tokens and parse
             tokens = line.split()
-            if len(tokens) != 2:
-                report("Expect only an opcode and immediate")
             if tokens[0] == INSTRUCTIONS[6]: 
                 current_PC += 3
             else: current_PC += 1

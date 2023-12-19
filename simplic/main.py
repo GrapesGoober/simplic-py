@@ -32,5 +32,5 @@ def count_lz():
     print(f"{A:016b}")
 
 if __name__ == '__main__':
-    #assemble_instructions()
-    count_lz()
+    assemble_instructions()
+    # count_lz()
