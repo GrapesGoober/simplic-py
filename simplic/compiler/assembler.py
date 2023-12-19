@@ -1,10 +1,43 @@
 from .error_print import ErrorPrint
 import re
 
-INSTRUCTIONS = [
-    "load", "store", "loadp", "storep", "insert", "compare", "jump", "clz",
-    "?", "add", "sub", "mul", "div", "and", "or", "not"
-]
+class Assembler:
+    def __init__(self) -> None:
+        self.INSTRUCTIONS = [
+            "load", "store", "loadp", "storep", "insert", "compare", "jump", "clz",
+            "?", "add", "sub", "mul", "div", "and", "or", "not"
+        ]
+        self.source = ""
+        self.bytecodes = []
+        self.labels = {}
+        self.label_points = []
+
+    def load(self, source: str) -> None:
+        self.source = source
+        with open(source, 'r') as f:
+            for i, line in enumerate(f):
+                # read line and exclude comments
+                line = line.lower().strip().split('#')[0]
+                if not line: continue
+                self.parse_line(i, line)
+    
+    def parse_line(self, i: int, line: str):
+        report = ErrorPrint(i, source).report
+        # capture current label
+        if ':' in line:
+            match = re.match(r'^\s*(\w\w*)\s*:\s*$', line)
+            if not match:
+                report("Invalid label syntax")
+            l = match.group(1)
+            if l in self.labels:
+                report(f"Duplicate label '{l}'")
+            self.labels[l] = len(self.bytecodes)
+            
+        else:
+            # split code into individual tokens and parse
+            tokens = line.split()
+            self.bytecodes.append(tokens)
+
 
 def literal_to_int(token: str) -> int:
     BITSIZE = 4
@@ -44,10 +77,6 @@ def asm_to_dict(source: str) -> dict:
 
             # split code into individual tokens and parse
             tokens = line.split()
-            if tokens[0] == INSTRUCTIONS[6]: 
-                address += 3
-            else: address += 1
-
             asm.append(tokens)
             
     return asm, labels
