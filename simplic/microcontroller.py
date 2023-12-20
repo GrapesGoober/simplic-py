@@ -21,7 +21,7 @@ class SimplicMicrocontroller:
                 V = instr[PC + 1] << 8 | instr[PC + 2]
                 PC += 2
             case 0x1: # If
-                Z, N = self.ZN
+                Z, N = A == 0, A >> 15
                 dest = instr[PC + 1] << 8 | instr[PC + 2]
                 # conditions: always, less, high, equal, nequal, lesseq, higheq
                 cond = [True, N, not Z and not N, Z, not Z, N or Z, not N]
