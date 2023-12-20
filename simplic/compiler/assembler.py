@@ -1,4 +1,5 @@
 from .error_print import ErrorPrint
+import re
 
 INSTRUCTIONS = [
     "load", "store", "loadp", "storep", "insert", "compare", "jump", "clz",
@@ -32,9 +33,10 @@ def asm_to_dict(source: str) -> dict:
 
             # capture current label
             if ':' in line:
-                if len(line.split()) != 1: 
-                    report("Expect only one name for label")
-                current_label = line[:-1]
+                match = re.match(r'^\s*(\w\w*)\s*:\s*$', line)
+                if not match:
+                    report("Invalid label syntax")
+                current_label = match.group(1)
                 if current_label in asm:
                     report(f"Duplicate label '{current_label}'")
                 asm[current_label] = [f"at PC = {current_PC}"]

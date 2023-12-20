@@ -6,7 +6,7 @@ start:
     set 4   1   # 'increment' at 4
     set 5   24  # 'max' at 5
 
-loop:
+fib_loop:
     load    0   # next = previous + current    
     add     1
     store   2
@@ -21,9 +21,6 @@ loop:
     add     4 
     store   3
     jump    loop
-
-start:
-    jump loop
 
 
     
