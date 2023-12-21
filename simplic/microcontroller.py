@@ -50,13 +50,14 @@ class SimplicMicrocontroller:
         while self.memory[0x0] < 0xFFFF:
             self.execute()
         print("internal state")
-        for i in range(3):
-            print(f"{i}\t{self.memory[i]}")
+        print(f"  PC\t{self.memory[0]}")
+        print(f"  A\t{self.memory[1]}")
+        print(f"  SP\t{self.memory[2]}")
 
         print("stack")
         for i in range(0xF):
             P = self.memory[2]
-            print(f"{i:0x}\t{self.memory[P - i]}")
+            print(f"  {i:0x}\t{self.memory[P - i]}")
 
 
 
