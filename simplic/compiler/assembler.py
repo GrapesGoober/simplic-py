@@ -46,7 +46,7 @@ class Assembler():
             raise AsmException("Expect a only a single label")
         label = line[:-1].split()[0]
         if label in self.labels:  
-            raise AsmException(f"Duplicate label {label}")
+            raise AsmException("Duplicate label")
         self.labels[label] = len(self.bytecodes) - 1
 
     def parse_instr(self, line: str):
@@ -77,10 +77,10 @@ class Assembler():
             else: 
                 result = int(token, 10)
         except ValueError:
-            raise AsmException(f"Invalid immediate syntax.")
+            raise AsmException("Invalid immediate syntax.")
 
         if result.bit_length() < bitsize: 
-            raise AsmException("Immediate value too big for {bitsize} bits.")
+            raise AsmException(f"Immediate value too big for {bitsize} bits.")
         
         return result
 
@@ -89,7 +89,7 @@ class Assembler():
     def to_file(self, dest: str) -> None:
         for i, label in self.label_points:
             if label not in self.labels: 
-                raise AsmException(f"Unknown label {label}")
+                raise AsmException("Unknown label")
             address = self.labels[label] - 1
             self.bytecodes[i] = f'{(address >> 8):02x}'
             self.bytecodes[i + 1] = f'{(address & 0xFF):02x}'
