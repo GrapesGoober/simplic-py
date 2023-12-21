@@ -10,9 +10,7 @@ def run_microcontroller():
 def assemble_instructions():
     source = "simplic\\test_codes\\fib.asm"
     destination = "simplic\\test_codes\\fib.hex"
-    a = assembler.Assembler()
-    a.load(source)
-    a.store(destination)
+    assembler.file_to_file(source, destination)
 
 def count_lz():
     clz = lambda: len(f"{V1:016b}".split('1')[0])
@@ -35,5 +33,5 @@ def count_lz():
 
 if __name__ == '__main__':
     assemble_instructions()
-    run_microcontroller()
+    # run_microcontroller()
     # count_lz()

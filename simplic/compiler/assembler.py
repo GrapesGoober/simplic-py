@@ -1,114 +1,93 @@
 import re
 
-class Assembler:
-    def __init__(self) -> None:
-        self.opcodes = [
-            "set",  "if", "stack", "load", "store", "loadm", "storem",  
-            "add", "sub", "lsl", "lsr", "mul", "div", "and", "or", "not"
-        ]
-        self.conditions = [
-            "always", "less", "high", "equal", "nequal", "lesseq", "higheq"
-        ]
-        self.source = ""
-        self.bytecodes = []
-        self.labels = {}
-        self.label_points = []
+OPCODES = [
+    "set",  "if", "stack", "load", "store", "loadm", "storem",  
+    "add", "sub", "lsl", "lsr", "mul", "div", "and", "or", "not"
+]
 
-    def load(self, source: str) -> None:
-        self.source = source
-        with open(source, 'r') as f:
-            for line_num, line in enumerate(f):
-                # read line and exclude comments
-                line = line.lower().strip().split('#')[0]
-                if not line: continue
-                status = self.parse_line(line)
-                if status:
-                    self.print_error(line_num, status)
-                    return
-        for i, label in self.label_points:
-            address = self.labels[label] - 1
-            self.bytecodes[i] = f'{(address >> 8):02x}'
-            self.bytecodes[i+1] = f'{(address & 0xFF):02x}'
+CONDITIONS = [
+    "always", "less", "high", "equal", "nequal", "lesseq", "higheq"
+]
 
-    def store(self, dest: str) -> None:
-        max_width, width = 16, 0
-        with open(dest, 'w') as f:
-            for b in self.bytecodes:
-                f.write(b + ' ')
-                width += 1
-                if width == max_width:
-                    width = 0
-                    f.write('\n')
+bytecodes, labels, label_points = [], {}, []
 
-    def parse_line(self, line: str) -> str:
+def file_to_file(src: str, dest: str) -> None:
+    with open(src, 'r') as f:
+        for line_num, line in enumerate(f):
+            # read line and exclude comments
+            line = line.lower().strip().split('#')[0]
+            cursor = src, line_num, line
+            if not line: continue
+            elif ':' in line: parse_label(cursor)
+            else: parse_instr(cursor)
 
-        word, comma = r'(\w+)\s*', r',\s*'
+    for line_num, label in label_points:
+        cursor = src, line_num, ''
+        if label not in labels: 
+            error(cursor, f"Unknown label {label}")
+        address = labels[label] - 1
+        bytecodes[line_num] = f'{(address >> 8):02x}'
+        bytecodes[line_num + 1] = f'{(address & 0xFF):02x}'
 
-        label = re.match(f'^{word}:$', line)
-        instr = re.match(f'^{word}{word}(?:{comma}{word})?$', line)
+    max_width, width = 16, 0
+    with open(dest, 'w') as f:
+        for b in bytecodes:
+            f.write(b + ' ')
+            width += 1
+            if width == max_width:
+                width = 0
+                f.write('\n')
 
-        if label:
-            l = label.group(1)
-            if l in self.labels: return f"Duplicate label '{l}'"
-            self.labels[l] = len(self.bytecodes)
-        elif instr:
-            opcode, var, imm = instr.groups()
+def parse_label(cursor: tuple) -> None:
+    _,_, line = cursor
+    if line[-1] != ':':
+        error(cursor, "Expect a line to end with colon")
+    elif line[:-1].split() != 1:
+        error(cursor, "Expect a only a single label")
+    label = line[:-1].split()[0]
+    if label in labels:  
+        error(cursor, f"Duplicate label {label}")
+    labels[label] = len(bytecodes) - 1
+
+def parse_instr(cursor: tuple) -> str:
+    _,_, line = cursor
+    tokens = line.split()
+    match tokens[0]:
+        case 'set': 
+            if len(tokens) != 3:
+                error(cursor, "'SET' expects only 2 operands: variable and value.") 
+            _, var, val = tokens
+
+        case 'if': 
+            if len(tokens) != 3: return "'IF' expects only 2 operands: condition and label."
+
+        case 'stack': 
+            if len(tokens) != 2: return "'IF' expects only 1 operand: 'PUSH' or 'POP'."
             
-            if opcode == "set":
-                if imm is None: return "Expect an immediate"
+        case _:
+            pass
 
-                opcode = self.opcodes.index(opcode)
-                var = self.parse_literal(var)
-                imm = self.parse_literal(imm)
-                self.bytecodes.append(f'{opcode:x}{var:x}')
-                self.bytecodes.append(f'{(imm >> 8):02x}')
-                self.bytecodes.append(f'{(imm & 0xFF):02x}')
+def parse_literal(token: str, bitsize: int) -> int:
+    try:
+        if token.startswith("0x"): 
+            result = int(token, 16)
+        elif token.startswith("0b"): 
+            result = int(token, 2)
+        else: 
+            result = int(token, 10)
+    except ValueError:
+        raise Exception(f"Invalid immediate syntax.")
 
-            elif opcode == "if":
-                if imm is None: return "Expect a label"
-                self.label_points.append((len(self.bytecodes)+1, imm))
-                opcode = self.opcodes.index(opcode)
-                var = self.conditions.index(var)
-                self.bytecodes.append(f'{opcode:x}{var:x}')
-                self.bytecodes.append('--')
-                self.bytecodes.append('--')
+    if result.bit_length() < bitsize: return "Immediate value too big for {bitsize} bits."
+    return result
 
-            elif opcode == "stack":
-                if imm is not None: return "Unexpected token"
-                opcode = self.opcodes.index(opcode)
-                var = ['pop', 'push'].index(opcode)
-                self.bytecodes.append(f'{opcode:x}{var:x}')
+def error(cursor: tuple, message: str):
+    source, line_num = cursor
+    err_string = "\n"
+    with open(source, 'r') as f:
+        for i, line in enumerate(f):
+            if line_num - 3 < i < line_num + 2: 
+                err_string += f"  {i+1}:\t{line}"
 
-            elif opcode in self.opcodes:
-                if imm is not None: return "Unexpected token"
-                opcode = self.opcodes.index(opcode)
-                var = self.parse_literal(var)
-                self.bytecodes.append(f'{opcode:x}{var:x}')
-
-            else: return "Invalid opcode"
-
-
-        else: "Invalid syntax"
-        
-    def print_error(self, line_num, message):
-        err_string = "\n"
-        with open(self.source, 'r') as f:
-            for i, line in enumerate(f):
-                if line_num - 3 < i < line_num + 2: 
-                    err_string += f"  {i+1}:\t{line}"
-        print(err_string, f"Error at line {line_num + 1}:", message)
-
-    def parse_literal(self, token: str) -> int:
-        BITSIZE = 16
-        try:
-            if token.startswith("0x"): 
-                result = int(token, 16)
-            elif token.startswith("0b"): 
-                result = int(token, 2)
-            else: 
-                result = int(token, 10)
-        except ValueError:
-            raise Exception(f"Invalid immediate syntax.")
-
-        assert result.bit_length() < BITSIZE, "Immediate value too big for {BITSIZE} bits."
-        return result
+    err_string += f"Error at line {line_num + 1}: {message}\n"
+    raise Exception(err_string)
