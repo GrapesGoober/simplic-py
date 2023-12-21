@@ -26,7 +26,7 @@ class SimplicMicrocontroller:
                 dest = instr[PC + 1] << 8 | instr[PC + 2]
                 PC = dest if cond[I] else PC + 2
             case 0x2: # Stack slide
-                SP += I | 0xFFF0 if I >> 3 else I                  
+                SP += 0xFFF0 if I else 0x10                 
             case 0x3: A = V             # Load
             case 0x4: V = A             # Store
             case 0x5: A = mem[V]        # Load Memory
