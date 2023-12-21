@@ -24,7 +24,7 @@ class SimplicMicrocontroller:
                 Z, N = A == 0, A >> 15
                 cond = [True, N, not (Z or N), Z, not Z, N or Z, not N] 
                 dest = instr[PC + 1] << 8 | instr[PC + 2]
-                PC = dest if cond[I] else PC + 2
+                PC = dest - 1 if cond[I] else PC + 2
             case 0x2: # Stack slide
                 SP += 0xFFF0 if I else 0x10                 
             case 0x3: A = V             # Load

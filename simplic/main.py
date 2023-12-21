@@ -33,5 +33,5 @@ def count_lz():
 
 if __name__ == '__main__':
     assemble_instructions()
-    # run_microcontroller()
+    run_microcontroller()
     # count_lz()
