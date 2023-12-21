@@ -17,24 +17,25 @@ class SimplicMicrocontroller:
         V = mem[SP - I]
 
         match opcode:
-            case 0x0: # Set
+            case 0x0:                   # Set
                 V = instr[PC + 1] << 8 | instr[PC + 2]
                 PC += 2
-            case 0x1: # If
+            case 0x1:                   # If
                 Z, N = A == 0, A >> 15
                 dest = instr[PC + 1] << 8 | instr[PC + 2]
-                # conditions: always, less, high, equal, nequal, lesseq, higheq
-                cond = [True, N, not Z and not N, Z, not Z, N or Z, not N]
+                # always, less, high, equal, nequal, lesseq, higheq
+                cond = [True, N, not Z and not N, Z, not Z, N or Z, not N]   
                 PC = dest if cond[I] else PC + 2
-            case 0x2: A = V             # Load
-            case 0x3: V = A             # Store
-            case 0x4: A = mem[V]        # Load Memory
-            case 0x5: mem[V] = A        # Store Memory
-            case 0x6:   pass            # increment/decrement P
+            case 0x2:                   # Stack - Increment/Decrement SP 
+                SP += I | 0xFFF0 if I >> 3 else I            
+            case 0x3: A = V             # Load
+            case 0x4: V = A             # Store
+            case 0x5: A = mem[V]        # Load Memory
+            case 0x6: mem[V] = A        # Store Memory
             case 0x7: A +=  V           # Add
             case 0x8: A -=  V           # Sub
             case 0x9: A <<= V           # LSL
-            case 0xA: A >>= V           # ASR
+            case 0xA: A >>= V           # LSR
             case 0xB: A *=  V           # Mul
             case 0xC: A //= V           # Div
             case 0xD: A &=  V           # And
