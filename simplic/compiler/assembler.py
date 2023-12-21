@@ -1,4 +1,4 @@
-from .exceptions import AsmException
+from compiler.exceptions import AsmException
 
 OPCODES = [
     "set",  "if", "stack", "load", "store", "loadm", "storem",  
