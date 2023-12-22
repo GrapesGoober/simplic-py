@@ -14,58 +14,41 @@ STACK_OP = ['pop', 'push']
 # These two will use parse_label and parse_instr to build this intermediate representation
 # however, the 'from_list' will not populate 'source' and 'linenum'
 def file_to_file(source: str, destination: str) -> None:
-    asm = { 'source': source, 'labels': {}, 'code': [] }
-    current_pc = 0
+    asm = { 'source': source, 'labels': {}, 'code': [], 'current pc': 0 }
     with open(source, 'r') as f:
         for line_num, line in enumerate(f):
             line = line.lower().strip().split('#')[0]
-            if ':' in line:
-                result, label = parse_label(line, asm['labels'])
-                if not result: 
-                    error_print(source, line_num, label)
-                    return
-                asm['labels'][label] = current_pc
-            elif line:
-                tokens = line.split()
-                if tokens[0] == ('set' or 'if'):
-                    current_pc += 3
-                else: current_pc += 1
-                asm['code'].append(( line.split(), line_num ))
-
+            status, msg = parse_line(line, asm)
+            if not status: error_print(source, line_num, msg)
     status, msg, line_num = compile(asm, destination)
     if not status:
         error_print(source, line_num, msg)
 
 def list_to_file(asm_list: list[str], destination: str) -> None:
-    asm = { 'source': None, 'labels': {}, 'code': []}
-    current_pc = 0
+    asm = { 'source': None, 'labels': {}, 'code': [], 'current pc': 0}
     for line in asm_list:
-        if ':' in line:
-            result, label = parse_label(line, asm['labels'])
-            if not result: 
-                raise Exception(label)
-            asm['labels'][label] = current_pc
-        else:
-            tokens = line.split()
-            if tokens[0] == ('set' or 'if'):
-                current_pc += 3
-            else: current_pc += 1
-            asm['code'].append(( line.split(), None ))
+        status, msg = parse_line(line, asm)
+        if not status: raise Exception(msg)
     status, msg, _ = compile(asm, destination)
-    if not status:
-        raise Exception(msg)
+    if not status: raise Exception(msg)
 
-# These two returns (false, msg) when failed, otherwise (true, result)
-# returns a label
-def parse_label(line: str, labels: dict) -> tuple[bool, str]:
-    if line[-1] != ':':
-        return False, "Expect a line to end after colon"
-    elif len(line[:-1].split()) != 1:
-        return False, "Expect a only a single label"
-    label = line[:-1].split()[0]
-    if label in labels:  
-        return False, "Duplicate label"
-    return True, label
+def parse_line(line: str, asm: dict) -> tuple[bool, str]:
+    if ':' in line:
+        if line[-1] != ':':
+            return False, "Expect a line to end after colon"
+        elif len(line[:-1].split()) != 1:
+            return False, "Expect a only a single label"
+        label = line[:-1].split()[0]
+        if label in asm['labels']:  
+            return False, "Duplicate label"
+        asm['labels'][label] = asm['current pc']
+    elif line:
+        tokens = line.split()
+        if tokens[0] == ('set' or 'if'):
+            current_pc += 3
+        else: current_pc += 1
+        asm['code'].append(( line.split(), None ))
+    return True, None
 
 # this function compiles to destination
 # if the source and linenum is set, will print error message and exit
