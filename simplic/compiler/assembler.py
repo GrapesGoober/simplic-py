@@ -18,8 +18,10 @@ def file_to_file(source: str, destination: str) -> None:
     with open(source, 'r') as f:
         for line_num, line in enumerate(f):
             line = line.lower().strip().split('#')[0]
-            status, msg = parse_line(line, asm)
-            if not status: error_print(source, line_num, msg)
+            status, msg = parse_line(line, asm, line_num)
+            if not status: 
+                error_print(source, line_num, msg)
+                return
     status, msg, line_num = compile(asm, destination)
     if not status:
         error_print(source, line_num, msg)
@@ -32,7 +34,7 @@ def list_to_file(asm_list: list[str], destination: str) -> None:
     status, msg, _ = compile(asm, destination)
     if not status: raise Exception(msg)
 
-def parse_line(line: str, asm: dict) -> tuple[bool, str]:
+def parse_line(line: str, asm: dict, line_num: int = None) -> tuple[bool, str]:
     if ':' in line:
         if line[-1] != ':':
             return False, "Expect a line to end after colon"
@@ -40,20 +42,20 @@ def parse_line(line: str, asm: dict) -> tuple[bool, str]:
             return False, "Expect a only a single label"
         label = line[:-1].split()[0]
         if label in asm['labels']:  
-            return False, "Duplicate label"
+            return False, f"Duplicate label '{label}'"
         asm['labels'][label] = asm['current pc']
     elif line:
         tokens = line.split()
         if tokens[0] == ('set' or 'if'):
-            current_pc += 3
-        else: current_pc += 1
-        asm['code'].append(( line.split(), None ))
+            asm['current pc'] += 3
+        else: asm['current pc'] += 1
+        asm['code'].append(( line.split(), line_num ))
     return True, None
 
 # this function compiles to destination
 # if the source and linenum is set, will print error message and exit
 # otherwise, raise exception
-def compile(asm: dict, destination: str) -> tuple[bool, str]:
+def compile(asm: dict, destination: str) -> tuple[bool, str, int]:
     bytecodes = []
     for tokens, line_num in asm['code']:
         status, codes = compile_instr(tokens, asm['labels'])
@@ -74,7 +76,7 @@ def compile(asm: dict, destination: str) -> tuple[bool, str]:
 def compile_instr(tokens: list, labels: dict) -> tuple[bool, list]:
     
     if tokens[0] not in OPCODES:
-        return False, "Invalid opcode"
+        return False, f"Invalid opcode '{tokens[0]}'"
     
     opcode = OPCODES.index(tokens[0])
     operand, immediate = 0, None
@@ -90,9 +92,9 @@ def compile_instr(tokens: list, labels: dict) -> tuple[bool, list]:
             if len(tokens) != 3: 
                 return False, "Expects only condition and label"
             if tokens[1] not in CONDITIONS:
-                return False, "Invalid condition"
+                return False, f"Invalid condition '{tokens[1]}'"
             if tokens[2] not in labels:
-                return False, "Undeclared label"
+                return False, f"Undeclared label '{tokens[2]}'"
             operand = CONDITIONS.index(tokens[1]) 
             immediate = labels[tokens[2]]
         case 'stack':
