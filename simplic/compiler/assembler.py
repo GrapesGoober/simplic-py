@@ -1,4 +1,4 @@
-from compiler.exceptions import AsmException
+from compiler.exceptions import SimplicErr
 
 OPCODES = [
     "set",  "if", "stack", "load", "store", "loadm", "storem",  
@@ -38,6 +38,7 @@ def parse_line(line: str, asm: dict, line_num: int = None) -> tuple[bool, str]:
     if ':' in line:
         if line[-1] != ':':
             return False, "Expect a line to end after colon"
+
         elif len(line[:-1].split()) != 1:
             return False, "Expect a only a single label"
         label = line[:-1].split()[0]
@@ -76,43 +77,42 @@ def compile(asm: dict, destination: str) -> tuple[bool, str, int]:
 def compile_instr(tokens: list, labels: dict) -> tuple[bool, list]:
     
     if tokens[0] not in OPCODES:
-        return False, f"Invalid opcode '{tokens[0]}'"
+        raise SimplicErr( f"Invalid opcode '{tokens[0]}'")
     
     opcode = OPCODES.index(tokens[0])
     operand, immediate = 0, None
     match tokens[0]:
         case 'set':
             if len(tokens) != 3:
-                return False, "Expects a variable and a value"
-            status, operand = parse_literal(tokens[1], 4)
-            if not status: return status, operand
-            status, immediate = parse_literal(tokens[2], 16)
-            if not status: return status, immediate
+                raise SimplicErr("Expects a variable and a value")
+            operand = parse_literal(tokens[1], 4)
+            immediate = parse_literal(tokens[2], 16)
         case 'if':
             if len(tokens) != 3: 
-                return False, "Expects only condition and label"
+                raise SimplicErr("Expects only condition and label")
             if tokens[1] not in CONDITIONS:
-                return False, f"Invalid condition '{tokens[1]}'"
+                raise SimplicErr(f"Invalid condition '{tokens[1]}'")
             if tokens[2] not in labels:
-                return False, f"Undeclared label '{tokens[2]}'"
+                # TODO do the recursive jump
+                if eqfwef
+                raise SimplicErr(f"Undeclared label '{tokens[2]}'")
             operand = CONDITIONS.index(tokens[1]) 
             immediate = labels[tokens[2]]
         case 'stack':
             if len(tokens) != 2: 
-                return False, "Expects either 'PUSH' or 'POP'"
+                raise SimplicErr("Expects either 'PUSH' or 'POP'")
             if tokens[1] not in STACK_OP:
-                return False, "Expects either 'PUSH' or 'POP'"
+                raise SimplicErr("Expects either 'PUSH' or 'POP'")
             operand = STACK_OP.index(tokens[1])
         case _:
             if len(tokens) != 2: 
                 return False, "Expects variable operand"
-            status, operand = parse_literal(tokens[1], 4) 
-            if not status: return status, operand
+            operand = parse_literal(tokens[1], 4) 
 
     if immediate == None:
-        return True, [f'{opcode:01x}{operand:01x}']
+        return [f'{opcode:01x}{operand:01x}']
     else:
-        return True, [
+        return [
             f'{opcode:01x}{operand:01x}',
             f'{( immediate >> 8 ):02x}',
             f'{( immediate & 0xFF ):02x}',
@@ -127,18 +127,7 @@ def parse_literal(token: str, bitsize: int) -> int:
         else: 
             result = int(token, 10)
     except ValueError:
-        return False, "Invalid immediate syntax"
-
+        raise SimplicErr("Invalid immediate syntax")
     if result.bit_length() > bitsize: 
-        return False, f"Immediate value too big for {bitsize} bits."
-    
-    return True, result
-
-def error_print(source, line_num, message) -> None:
-    err_string = "\n"
-    with open(source, 'r') as f:
-        for i, line in enumerate(f):
-            if line_num - 3 < i < line_num + 2: 
-                err_string += f"  {i+1}:\t{line}"
-    print(err_string)
-    print(f"Error at line {line_num + 1}: {message}", end='\n\n')
+        raise SimplicErr(f"Immediate value too big for {bitsize} bits.")
+    return result
