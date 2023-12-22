@@ -1,17 +1,15 @@
 # simplic-py
 A refactor of simplic compiler built in python
+
 # File Structure
-
-
 ```
-├── examples/
-    ├── fibbo.asm.txt
-    └── fibbo.asm.hex
-└── src/
+├── simplic
     ├── main.py
-    └── aofs/
-        ├── __init__.py
-        ├── asm_parser.py
-        ├── asm_token_set.py
-        └── filetofile.py
+    ├── microcontroller.py
+    ├── compiler
+    │   ├── assembler.py
+    │   └── exceptions.py
+    └── test_codes
+        ├── fib.asm
+        └── fib.hex
 ```
