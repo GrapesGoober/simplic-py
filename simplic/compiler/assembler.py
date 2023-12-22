@@ -11,8 +11,8 @@ CONDITIONS = [
 
 STACK_OP = ['pop', 'push']
 
-# These two will use parse_label and parse_instr to build this intermediate representation
-# however, the 'from_list' will not populate 'source' and 'linenum'
+
+
 def file_to_file(source: str, destination: str) -> None:
     sasm = SimplicAsm()
     with open(source, 'r') as f:
