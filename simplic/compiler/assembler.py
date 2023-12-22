@@ -11,19 +11,6 @@ CONDITIONS = [
 
 STACK_OP = ['pop', 'push']
 
-# using intermediate object { source: null, label: { address: 0, code: [ [["unparsed", "tokens"], linenum] ] } }
-{
-    # using source here
-    'source': None,
-    'labels': {
-        'start': 0
-    },
-    'code': [                   # Using linenum here
-        (["unparsed", "tokens"], None),
-        (["unparsed", "tokens"], None),
-    ]
-}
-
 # These two will use parse_label and parse_instr to build this intermediate representation
 # however, the 'from_list' will not populate 'source' and 'linenum'
 def file_to_file(source: str, destination: str) -> None:
@@ -44,7 +31,7 @@ def file_to_file(source: str, destination: str) -> None:
                     current_pc += 3
                 else: current_pc += 1
                 asm['code'].append(( line.split(), line_num ))
-                
+
     status, msg, line_num = compile(asm, destination)
     if not status:
         error_print(source, line_num, msg)
@@ -86,23 +73,10 @@ def parse_label(line: str, labels: dict) -> tuple[bool, str]:
 def compile(asm: dict, destination: str) -> tuple[bool, str]:
     bytecodes = []
     for tokens, line_num in asm['code']:
-        if tokens[0] not in OPCODES:
-            return False, "Invalid opcode"
-        match tokens[0]:
-            case 'set':
-                status, operands = compile_set_operands(tokens)
-            case 'if':
-                status, operands = compile_if_operands(tokens, asm['labels'])
-            case 'stack':
-                status, operands = compile_stack_operands(tokens)
-            case _:
-                status, operands = compile_default_operands(tokens)
+        status, codes = compile_instr(tokens, asm['labels'])
         if not status:
-            return status, operands, line_num
-        opcode = OPCODES.index(tokens[0])
-        bytecodes.append(f'{opcode:x}{operands[0]}')
-        if len(operands) == 3:
-            bytecodes += operands[1], operands[2]
+            return status, codes, line_num
+        bytecodes += codes
 
     max_width, width = 16, 0
     with open(destination, 'w') as f:
@@ -114,55 +88,50 @@ def compile(asm: dict, destination: str) -> tuple[bool, str]:
                 f.write('\n')
     return True, '', None
 
-def compile_set_operands(tokens: list) -> tuple[bool, any]:
-    if len(tokens) != 3:
-        return False, "Expects only variable and value"
+def compile_instr(tokens: list, labels: dict) -> tuple[bool, list]:
     
-    status, I = parse_literal(tokens[1], 4)
-    if not status:
-        return status, I
-    status, Imm = parse_literal(tokens[2], 16)
-    if not status:
-        return status, Imm
+    if tokens[0] not in OPCODES:
+        return False, "Invalid opcode"
     
-    return True, (
-        f"{I:x}",
-        f"{( Imm >> 8 ):02x}", 
-        f"{( Imm & 0xFF ):02x}"
-    )
+    opcode = OPCODES.index(tokens[0])
+    operand, immediate = 0, None
+    match tokens[0]:
+        case 'set':
+            if len(tokens) != 3:
+                return False, "Expects a variable and a value"
+            status, operand = parse_literal(tokens[1], 4)
+            if not status: return status, operand
+            status, immediate = parse_literal(tokens[2], 16)
+            if not status: return status, immediate
+        case 'if':
+            if len(tokens) != 3: 
+                return False, "Expects only condition and label"
+            if tokens[1] not in CONDITIONS:
+                return False, "Invalid condition"
+            if tokens[2] not in labels:
+                return False, "Undeclared label"
+            operand = CONDITIONS.index(tokens[1]) 
+            immediate = labels[tokens[2]]
+        case 'stack':
+            if len(tokens) != 2: 
+                return False, "Expects either 'PUSH' or 'POP'"
+            if tokens[1] not in STACK_OP:
+                return False, "Expects either 'PUSH' or 'POP'"
+            operand = STACK_OP.index(tokens[1])
+        case _:
+            if len(tokens) != 2: 
+                return False, "Expects variable operand"
+            status, operand = parse_literal(tokens[1], 4) 
+            if not status: return status, operand
 
-def compile_if_operands(tokens: list, labels: dict) -> tuple[bool, any]:
-    if len(tokens) != 3: 
-        return False, "Expects only condition and label"
-    if tokens[1] not in CONDITIONS:
-        return False, "Invalid condition"
-    if tokens[2] not in labels:
-        return False, "Undeclared label"
-
-    cond = CONDITIONS.index(tokens[1]) 
-    label = labels[tokens[2]]
-
-    return True, (
-        f'{cond:x}',
-        f'{( label >> 8 ):02x}',
-        f'{( label & 0xFF ):02x}',
-    )
-
-def compile_stack_operands(tokens: list) -> tuple[bool, any]:
-    if len(tokens) != 2: 
-        return False, "Expects either 'PUSH' or 'POP'"
-    if tokens[1] not in STACK_OP:
-        return False, "Expects either 'PUSH' or 'POP'"
-    m = STACK_OP.index(tokens[1])
-    return True, (f'{m:x}')
-
-def compile_default_operands(tokens: list) -> tuple[bool, any]:
-    if len(tokens) != 2: 
-        return False, "Expects variable index"
-    status, I = parse_literal(tokens[1], 4) 
-    if not status:
-        return status, I
-    return True, (f"{I:x}")
+    if immediate == None:
+        return True, [f'{opcode:01x}{operand:01x}']
+    else:
+        return True, [
+            f'{opcode:01x}{operand:01x}',
+            f'{( immediate >> 8 ):02x}',
+            f'{( immediate & 0xFF ):02x}',
+        ]
 
 def parse_literal(token: str, bitsize: int) -> int:
     try:
