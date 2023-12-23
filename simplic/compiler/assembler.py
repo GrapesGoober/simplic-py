@@ -36,20 +36,17 @@ class SimplicAsm:
 
     def parse_label(self, line: str) -> None:
         if ':' in line:
+            tokens = line[:-1].split()
             if line[-1] != ':':
                 raise SimplicErr("Expect a line end after colon")
-            elif len(line[:-1].split()) != 1:
+            elif len(tokens) != 1:
                 raise SimplicErr("Expect only a single label")
-            label = line[:-1].split()[0]
-            if label in self.labels:  
-                raise SimplicErr(f"Duplicate label '{label}'")
-            self.labels[label] = self.PC
+            if tokens[0] in self.labels:  
+                raise SimplicErr(f"Duplicate label '{tokens[0]}'")
+            self.labels[tokens[0]] = self.PC
         elif line:
             opcode = line.split()[0]
-            if opcode == ('set' or 'if'):
-                self.PC += 3
-            else:
-                self.PC += 1
+            self.PC += 3 if opcode in ('set', 'if') else 1
 
     def parse_instr(self, line: str) -> None:
         if not line or ':' in line: return
