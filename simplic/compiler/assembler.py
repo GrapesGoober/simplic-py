@@ -11,36 +11,22 @@ CONDITIONS = [
 
 STACK_OP = ['pop', 'push']
 
-
-
 def file_to_file(source: str, destination: str) -> None:
     sasm = SimplicAsm()
-    with open(source, 'r') as f:
-        for linenum, line in enumerate(f):
-            try:
-                line = line.strip().split('#')[0]
-                sasm.parse_label(line)
-            except SimplicErr as se:
-                error_print(source, linenum, se.message)
-                return
-    
-    with open(source, 'r') as f:
-        for linenum, line in enumerate(f):
-            try:
-                line = line.strip().split('#')[0]
-                sasm.parse_instr(line)
-            except SimplicErr as se:
-                error_print(source, linenum, se.message)
-                return
+    with open(source, 'r') as f: file = list(f)
+    try: 
+        for linenum, line in enumerate(file):
+            sasm.parse_label(line.strip().split('#')[0])
+        for linenum, line in enumerate(file):
+            sasm.parse_instr(line.strip().split('#')[0])
+    except SimplicErr as se:
+        error_print(source, linenum, se.message)
+        return 
                 
-    max_width, width = 16, 0
     with open(destination, 'w') as f:
-        for b in sasm.bytecodes:
-            f.write(b + ' ')
-            width += 1
-            if width == max_width:
-                width = 0
-                f.write('\n')
+        for i, b in enumerate(sasm.bytecodes):
+            newline = '\n' if ((i + 1) % 16 == 0) else ''
+            f.write(f'{b:02x} {newline}')
 
 class SimplicAsm:
     def __init__(self) -> None:
@@ -98,11 +84,9 @@ class SimplicAsm:
                     raise SimplicErr("Expects variable operand")
                 operand = self.parse_literal(tokens[1], 4) 
 
-        self.bytecodes.append(f'{opcode:x}{operand:x}')
+        self.bytecodes.append(opcode << 4 | operand & 0xF)
         if immediate != None:
-            self.bytecodes.append(f'{( immediate >> 8 ):02x}')    
-            self.bytecodes.append(f'{( immediate & 0xFF ):02x}')    
-            
+            self.bytecodes += immediate >> 8, immediate & 0xFF
                     
     def parse_literal(self, token: str, bitsize: int) -> int:
         try:
