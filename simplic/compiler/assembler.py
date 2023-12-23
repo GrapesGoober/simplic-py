@@ -1,4 +1,4 @@
-from compiler.exceptions import AsmException
+from compiler.exceptions import SimplicErr, error_print
 
 OPCODES = [
     "set",  "if", "stack", "load", "store", "loadm", "storem",  
@@ -11,90 +11,81 @@ CONDITIONS = [
 
 STACK_OP = ['pop', 'push']
 
-def file_to_file(source: str, dest: str) -> None:
-    asm = Assembler()
-    with open(source, 'r') as f:
-        for line_num, line in enumerate(f):
-            # read line and exclude comments
-            line = line.lower().strip().split('#')[0]
-            cursor = source, line_num
-            try: 
-                asm.parse_line(line, cursor)
-            except AsmException as e: 
-                e.print()
-                return
-    
+def file_to_file(source: str, destination: str) -> None:
+    sasm = SimplicAsm()
+    with open(source, 'r') as f: file = list(f)
     try: 
-        asm.to_file(dest)
-    except AsmException as e: 
-        e.print()
-        return
+        for linenum, line in enumerate(file):
+            sasm.parse_label(line.strip().split('#')[0])
+        for linenum, line in enumerate(file):
+            sasm.parse_instr(line.strip().split('#')[0])
+    except SimplicErr as se:
+        error_print(source, linenum, se.message)
+        return 
+                
+    with open(destination, 'w') as f:
+        for i, b in enumerate(sasm.bytecodes):
+            newline = '\n' if ((i + 1) % 16 == 0) else ''
+            f.write(f'{b:02x} {newline}')
 
-class Assembler():
+class SimplicAsm:
     def __init__(self) -> None:
         self.bytecodes = []
         self.labels = {}
-        self.label_points = []
+        self.PC = 0
 
-    def parse_line(self, line: str, cursor: tuple = None) -> None:
-        if ':' in line: self.parse_label(line, cursor)
-        elif line: self.parse_instr(line, cursor)
-        else: return
+    def parse_label(self, line: str) -> None:
+        if ':' in line:
+            tokens = line[:-1].split()
+            if line[-1] != ':':
+                raise SimplicErr("Expect a line end after colon")
+            elif len(tokens) != 1:
+                raise SimplicErr("Expect only a single label")
+            if tokens[0] in self.labels:  
+                raise SimplicErr(f"Duplicate label '{tokens[0]}'")
+            self.labels[tokens[0]] = self.PC
+        elif line:
+            opcode = line.split()[0]
+            self.PC += 3 if opcode in ('set', 'if') else 1
 
-    def parse_label(self, line: str, cursor: tuple = None) -> None:
-        if line[-1] != ':':
-            raise AsmException("Expect a line to end after colon", cursor)
-        elif len(line[:-1].split()) != 1:
-            raise AsmException("Expect a only a single label", cursor)
-        label = line[:-1].split()[0]
-        if label in self.labels:  
-            raise AsmException("Duplicate label", cursor)
-        self.labels[label] = len(self.bytecodes)
-
-    def parse_instr(self, line: str, cursor: tuple = None):
+    def parse_instr(self, line: str) -> None:
+        if not line or ':' in line: return
         tokens = line.split()
         if tokens[0] not in OPCODES:
-            raise AsmException("Invalid opcode.", cursor)
-        OP  = OPCODES.index(tokens[0])
-        
+            raise SimplicErr( f"Invalid opcode '{tokens[0]}'")
+        opcode = OPCODES.index(tokens[0])
+        operand, immediate = 0, None
         match tokens[0]:
-            case 'set': 
+            case 'set':
                 if len(tokens) != 3:
-                    raise AsmException("'SET' expects only variable and value.", cursor)
-                I   = self.parse_literal(tokens[1], 4, cursor)
-                Imm = self.parse_literal(tokens[2], 16, cursor)
-                self.bytecodes.append(f"{OP:x}{I:x}")
-                self.bytecodes.append(f"{( Imm >> 8 ):02x}")
-                self.bytecodes.append(f"{( Imm & 0xFF ):02x}")
-
-            case 'if': 
+                    raise SimplicErr("Expects a variable and a value")
+                operand = self.parse_literal(tokens[1], 4)
+                immediate = self.parse_literal(tokens[2], 16)
+            case 'if':
                 if len(tokens) != 3: 
-                    raise AsmException("'IF' expects only condition and label.", cursor)
+                    raise SimplicErr("Expects only condition and label")
                 if tokens[1] not in CONDITIONS:
-                    raise AsmException("Invalid condition.", cursor)
-                COND = CONDITIONS.index(tokens[1]) 
-                self.bytecodes.append(f"{OP:x}{COND:x}")
-                label_point = len(self.bytecodes), tokens[2], cursor
-                self.label_points.append(label_point)
-                self.bytecodes.append('--')
-                self.bytecodes.append('--')
-
-            case 'stack': 
+                    raise SimplicErr(f"Invalid condition '{tokens[1]}'")
+                if tokens[2] not in self.labels:
+                    raise SimplicErr(f"Undeclared label '{tokens[2]}'")
+                operand = CONDITIONS.index(tokens[1]) 
+                immediate = self.labels[tokens[2]] 
+            case 'stack':
                 if len(tokens) != 2: 
-                    raise AsmException("'STACK' expects either 'PUSH' or 'POP'.", cursor)
+                    raise SimplicErr("Expects either 'PUSH' or 'POP'")
                 if tokens[1] not in STACK_OP:
-                    raise AsmException("'STACK' expects either 'PUSH' or 'POP'.", cursor)
-                m = STACK_OP.index(tokens[1])
-                self.bytecodes.append(f"{OP:x}{m:x}")
-                
+                    raise SimplicErr("Expects either 'PUSH' or 'POP'")
+                operand = STACK_OP.index(tokens[1])
             case _:
-                caps = tokens[0].capitalize()
                 if len(tokens) != 2: 
-                    raise AsmException(f"'{caps}' expects variable index", cursor)
-                I = self.parse_literal(tokens[1], 4, cursor) 
-                self.bytecodes.append(f"{OP:x}{I:x}")
+                    raise SimplicErr("Expects variable operand")
+                operand = self.parse_literal(tokens[1], 4) 
 
-    def parse_literal(self, token: str, bitsize: int, cursor: tuple = None) -> int:
+        self.bytecodes.append(opcode << 4 | operand & 0xF)
+        if immediate != None:
+            self.bytecodes += immediate >> 8, immediate & 0xFF
+                    
+    def parse_literal(self, token: str, bitsize: int) -> int:
         try:
             if token.startswith("0x"): 
                 result = int(token, 16)
@@ -103,26 +94,7 @@ class Assembler():
             else: 
                 result = int(token, 10)
         except ValueError:
-            raise AsmException("Invalid immediate syntax.", cursor)
-
+            raise SimplicErr("Invalid immediate syntax")
         if result.bit_length() > bitsize: 
-            raise AsmException(f"Immediate value too big for {bitsize} bits.", cursor)
-        
+            raise SimplicErr(f"Immediate value too big for {bitsize} bits.")
         return result
-
-    def to_file(self, dest: str) -> None:
-        for i, label, cursor in self.label_points:
-            if label not in self.labels: 
-                raise AsmException("Unknown label", cursor)
-            address = self.labels[label]
-            self.bytecodes[i] = f'{(address >> 8):02x}'
-            self.bytecodes[i + 1] = f'{(address & 0xFF):02x}'
-
-        max_width, width = 16, 0
-        with open(dest, 'w') as f:
-            for b in self.bytecodes:
-                f.write(b + ' ')
-                width += 1
-                if width == max_width:
-                    width = 0
-                    f.write('\n')
