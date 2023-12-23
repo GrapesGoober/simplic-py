@@ -5,7 +5,8 @@ A refactor of simplic compiler built in python
 ```
 ├── simplic
     ├── main.py
-    ├── microcontroller.py
+    ├── virtualmachine
+    │   └── virtualmachine.py
     ├── compiler
     │   ├── assembler.py
     │   └── exceptions.py
