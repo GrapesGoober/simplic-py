@@ -1,11 +1,11 @@
-from microcontroller import SimplicMicrocontroller
+from virtualmachine.virtualmachine import SimplicVM
 from compiler import assembler
 
 def run_microcontroller():
     filename = "simplic\\test_codes\\fib.hex"
-    mc = SimplicMicrocontroller()
-    mc.load_program(filename)
-    mc.run()
+    vm = SimplicVM()
+    vm.load_program(filename)
+    vm.run()
 
 def assemble_instructions():
     source = "simplic\\test_codes\\fib.asm"
