@@ -1,15 +1,14 @@
-from microcontroller import SimplicMicrocontroller
-from compiler import assembler
+from simplic import SimplicVM, assembler
 
 def run_microcontroller():
-    filename = "simplic\\test_codes\\fib.hex"
-    mc = SimplicMicrocontroller()
-    mc.load_program(filename)
-    mc.run()
+    filename = "test_codes\\fib.hex"
+    vm = SimplicVM()
+    vm.load_program(filename)
+    vm.run()
 
 def assemble_instructions():
-    source = "simplic\\test_codes\\fib.asm"
-    destination = "simplic\\test_codes\\fib.hex"
+    source = "test_codes\\fib.asm"
+    destination = "test_codes\\fib.hex"
     assembler.file_to_file(source, destination)
 
 def count_lz():

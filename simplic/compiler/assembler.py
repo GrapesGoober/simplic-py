@@ -1,4 +1,4 @@
-from compiler.exceptions import SimplicErr, error_print
+from simplic.compiler.exceptions import SimplicErr, error_print
 
 OPCODES = [
     "set",  "if", "stack", "load", "store", "loadm", "storem",  

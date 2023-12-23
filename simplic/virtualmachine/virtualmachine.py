@@ -1,4 +1,4 @@
-class SimplicMicrocontroller:
+class SimplicVM:
 
     def __init__(self) -> None:
         self.instructions   = {i: 0 for i in range(0x10000)}
