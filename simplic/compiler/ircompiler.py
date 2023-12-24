@@ -20,6 +20,8 @@ IR = {
             # ('loadm', 'b', 'c'),
             # ('storem', 12, 'c')
 
+            # ('setarg', 'a', 'b', 'c'),
+            # ('call', 'otherfunc')
         ]
     ]
 }
@@ -30,6 +32,7 @@ labels = {}
 lifetimes = {}
 for i, tokens in enumerate(code):
     match tokens[0]:
+        case 'call': continue
         case 'label':
             labels[tokens[1]] = i
         case 'if':

@@ -8,7 +8,13 @@ if __name__ == '__main__':
     # source = "test_codes\\fib.asm"
     # assembler.file_to_file(source, hexfile)
 
-    vm = SimplicVM()
-    vm.load_program(hexfile)
-    vm.run()
+    # vm = SimplicVM()
+    # vm.load_program(hexfile)
+    # vm.run()
+
+    k = input()
+    match k:
+        case 'a': print('a')
+        case 'b': print('b')
+        case k if k != 'c': print('c')
 
