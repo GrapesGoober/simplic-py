@@ -1,4 +1,4 @@
-start:
+label start
     set 0  1   # 'previous' at 0
     set 1  1   # 'current' at 1
     set 2  0   # 'next' at 2
@@ -6,7 +6,7 @@ start:
     set 4  1   # 'increment' at 4
     set 5  24  # 'max' at 5
 
-loop:
+label loop
     load    0   # next = previous + current    
     add     1
     store   2
