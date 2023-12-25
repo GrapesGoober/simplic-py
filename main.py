@@ -5,7 +5,7 @@ if __name__ == '__main__':
     hexfile = "test_codes\\fib.hex"
 
     # compiling asm to file
-    asmfile = "test_codes\\fib.asm"
+    asmfile = "test_codes\\IRfib.asm"
     asm = SimplicAsm()
     try:
         asm.from_file(asmfile)

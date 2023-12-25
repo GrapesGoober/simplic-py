@@ -24,10 +24,30 @@ IR = {
             # ('setarg', 'a', 'b', 'c'),
             # ('call', 'otherfunc')
         ]
+    ],
+    "fibbonaci" : [
+        [
+
+        ],
+        [
+            ('label', 'start'),
+            ('set',     'previous',     1),
+            ('set',     'current',      1),
+            ('set',     'next',         0),
+            ('set',     'counter',      2),
+            ('label', 'loop'),
+            ('add',     'next',         'previous', 'current'),
+            ('set',     'previous',     'current'),
+            ('set',     'current',      'next'),
+            ('add',     'counter',      'counter', 1),
+            ('cmp',     'counter',      24),
+            ('if', 'less', 'loop')
+
+        ]
     ]
 }
 
-code = IR['somefunc'][1]
+code = IR['fibbonaci'][1]
 
 # capture labels and determine variable live ranges
 labels = {}
@@ -71,11 +91,10 @@ for i, tokens in enumerate(code):
 # print(f"{tok} : {alloc[tokens[1]]}", end='\t')
 
 # Translate
-parent_funcname = 'func'
+parent_funcname = 'fibbonaci'
 asm = []
 for i, tokens in enumerate(code):
     tokenstring = " ".join([str(t) for t in tokens])
-    asm.append((f'# {str(tokenstring)}',))
     match tokens[0]:
         case 'setarg':
             # prepare call overhead
@@ -108,15 +127,14 @@ for i, tokens in enumerate(code):
                 immediates.pop(0)
 
             if isinstance(tokens[2], str): 
-                asm.append((op, alloc[tokens[2]]))
+                asm.append(('sub', alloc[tokens[2]]))
             elif isinstance(tokens[2], int):
                 asm.append(('set', immediates[0], tokens[2]))
-                asm.append((op, immediates[0]))
+                asm.append(('sub', immediates[0]))
                 immediates.pop(0)
 
         case _:
             op = tokens[0]
-
             if isinstance(tokens[2], str): 
                 asm.append(('load', alloc[tokens[2]]))
             elif isinstance(tokens[2], int):
