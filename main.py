@@ -1,20 +1,20 @@
-from simplic import SimplicVM, assembler
+from simplic import SimplicVM, SimplicAsm, SimplicErr, error_print
 
 if __name__ == '__main__':
 
     hexfile = "test_codes\\fib.hex"
 
-    # # compiling asm to file
-    # source = "test_codes\\fib.asm"
-    # assembler.file_to_file(source, hexfile)
+    # compiling asm to file
+    asmfile = "test_codes\\fib.asm"
+    asm = SimplicAsm()
+    try:
+        asm.from_file(asmfile)
+        asm.compile(hexfile)
+    except SimplicErr as e:
+        error_print(asmfile, asm.iter, e.message)
+        exit(-1)
 
-    # vm = SimplicVM()
-    # vm.load_program(hexfile)
-    # vm.run()
-
-    k = input()
-    match k:
-        case 'a': print('a')
-        case 'b': print('b')
-        case k if k != 'c': print('c')
+    vm = SimplicVM()
+    vm.load_program(hexfile)
+    vm.run()
 
