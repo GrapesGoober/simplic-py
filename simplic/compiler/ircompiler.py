@@ -4,17 +4,17 @@ IR = {
             "x", "y", "z"
         ],
         [
-            ('label', 'start'),
-            ('set', 'a', 0),
-            ('set', 'b', 1),
-            ('label', 'loop'),
-            ('add', 'a', 'a', 1),
-            ('set', 'i', 2),
-            ('add', 'j', 'b', 'a'),
-            ('add', 'a', 'j', 'i'),
-            ('cmp', 'a', 20),
-            ('if', 'less', 'loop'),
-            ('return', 'b'),
+            ('label',   'start'),
+            ('set',     'a', 0),
+            ('set',     'b', 1),
+            ('label',   'loop'),
+            ('add',     'a', 'a', 1),
+            ('set',     'i', 2),
+            ('add',     'j', 'b', 'a'),
+            ('add',     'a', 'j', 'i'),
+            ('cmp',     'a', 20),
+            ('if',      'less', 'loop'),
+            ('return',  'b'),
 
             # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
             # ('loadm', 'b', 'c'),
@@ -38,8 +38,8 @@ for i, tokens in enumerate(code):
         case 'if':
             if tokens[2] in labels:
                 for v, (start, end) in lifetimes.items():
-                    if start <= labels[tokens[2]] <= end:
-                        lifetimes[v][1] = i
+                    address = labels[tokens[2]]
+                    if start <= address <= end: lifetimes[v][1] = i
         case _:
             variables = []
             for var in tokens[1:]:
