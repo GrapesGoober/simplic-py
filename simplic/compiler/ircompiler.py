@@ -17,12 +17,14 @@ IR = {
             ('if',      'less', 'loop'),
             ('return',  'b'),
 
-            # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
+            # # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
             # ('loadm', 'b', 'c'),
             # ('storem', 12, 'c')
 
-            # ('setarg', 'a', 'b', 'c'),
-            # ('call', 'otherfunc')
+            # # handling function calls
+            # ('setargs', 'a', 'b', 'c'),
+            # ('call', 'otherfunc'),
+            # ('setret', 'a'),
         ]
     ],
     "fibbonaci" : [
@@ -90,6 +92,22 @@ for i, tokens in enumerate(code):
 
 # print(f"{tok} : {alloc[tokens[1]]}", end='\t')
 
+def load_operand(token, op):
+    if isinstance(token, str): 
+        asm.append((op, alloc[token]))
+    elif isinstance(token, int):
+        asm.append(('set', immediates[0], token))
+        asm.append((op, immediates[0]))
+        immediates.pop(0)
+
+def set_variable(assignee, value):
+    if isinstance(value, str): 
+        asm.append(('load', alloc[value]))
+        asm.append(('store', alloc[assignee]))
+    elif isinstance(value, int):
+        asm.append(('set', alloc[assignee], value))
+        immediates.pop(0)
+
 # Translate
 parent_funcname = 'fibbonaci'
 asm = []
@@ -110,45 +128,13 @@ for i, tokens in enumerate(code):
         case 'if':
             asm.append(('if', tokens[1], f"func.{tokens[2]}"))
         case 'set':
-            if isinstance(tokens[2], str): 
-                asm.append(('load', alloc[tokens[2]]))
-                asm.append(('store', alloc[tokens[1]]))
-            elif isinstance(tokens[2], int):
-                asm.append(('set', alloc[tokens[1]], tokens[2]))
-                immediates.pop(0)
+            set_variable(tokens[1], tokens[2])
         case 'cmp':
-            op = tokens[0]
-
-            if isinstance(tokens[1], str): 
-                asm.append(('load', alloc[tokens[1]]))
-            elif isinstance(tokens[2], int):
-                asm.append(('set', immediates[0], tokens[2]))
-                asm.append(('load', immediates[0]))
-                immediates.pop(0)
-
-            if isinstance(tokens[2], str): 
-                asm.append(('sub', alloc[tokens[2]]))
-            elif isinstance(tokens[2], int):
-                asm.append(('set', immediates[0], tokens[2]))
-                asm.append(('sub', immediates[0]))
-                immediates.pop(0)
-
+            load_operand(tokens[1], 'load')
+            load_operand(tokens[2], 'sub')
         case _:
-            op = tokens[0]
-            if isinstance(tokens[2], str): 
-                asm.append(('load', alloc[tokens[2]]))
-            elif isinstance(tokens[2], int):
-                asm.append(('set', immediates[0], tokens[2]))
-                asm.append(('load', immediates[0]))
-                immediates.pop(0)
-
-            if isinstance(tokens[3], str): 
-                asm.append((op, alloc[tokens[3]]))
-            elif isinstance(tokens[3], int):
-                asm.append(('set', immediates[0], tokens[3]))
-                asm.append((op, immediates[0]))
-                immediates.pop(0)
-
+            load_operand(tokens[2], 'load')
+            load_operand(tokens[3], tokens[0])
             asm.append(('store', alloc[tokens[1]]))
             
                 
