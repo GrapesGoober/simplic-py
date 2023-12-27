@@ -1,7 +1,7 @@
 IR = {
     "fibbonaci" : [
         [
-            
+            'a', 'b', 'c'
         ],
         [
             ('label', 'start'),
@@ -29,97 +29,67 @@ IR = {
     ]
 }
 
-code = IR['fibbonaci'][1]
 
-# capture labels and determine variable live ranges
-labels = {}
-live_range = {}
-for i, tokens in enumerate(code):
-    match tokens[0]:
-        case 'call': continue
-        case 'label': labels[tokens[1]] = i
-        case 'if':
-            if tokens[2] not in labels: continue
-            for tok, (start, end) in live_range.items():
-                address = labels[tokens[2]]
-                if start <= address <= end: live_range[tok][1] = i
-        case _:
-            variables = [v for v in tokens[1:] if isinstance(v, str)]
-            for tok in variables:
-                if tok in live_range: live_range[tok][1] = i
-                else: live_range[tok] = [i, i]
+class SimplicIR:
 
-# allocates variables and immediates
-alloc = {} # stores the variable mappings
-immediates = [] # stores the immediate value mappings
-avail = [0] # local variable, stores the current available usage
-for i, tokens in enumerate(code):
-    # if the current line uses variables, have to allocate/deallocate them
-    if tokens[0] in ('call', 'label', 'if'): continue
-    for tok in tokens[1:]:
-        # using variable: allocate variable locations onto frame
-        if isinstance(tok, str):
-            start, end = live_range[tok]
-            if i == start: # entering lifespan of a variable
-                alloc[tok] = avail[0]
-                if len(avail) == 1: avail[0] += 1
-                else: avail.pop(0)
-            elif i == end:  # exiting lifespan of a variable
-                avail.insert(0, alloc[tok])
-        # using immediate: allocate immediate values onto frame
-        elif isinstance(tok, int):
-            immediates += avail[0],
+    def __init__(self, funcdef: list) -> None:
+        self.args = funcdef[0]
+        self.code = funcdef[1]
+        self.alloc = {v:i for i, v in enumerate(self.args)}
+        self.top_of_stack = len(self.args) 
+        self.asm = []
 
-# print(f"{tok} : {alloc[tokens[1]]}", end='\t')
+    def get_alloc_mapping(self, variable: str):
+        if variable not in self.alloc:
+            self.alloc[variable] = self.top_of_stack
+            self.top_of_stack += 1
+        return self.alloc[variable]
 
-def load_operand(token, op):
-    if isinstance(token, str): 
-        asm.append((op, alloc[token]))
-    elif isinstance(token, int):
-        asm.append(('set', immediates[0], token))
-        asm.append((op, immediates[0]))
-        immediates.pop(0)
+    def take_operand(self, token: str, op: str):
+        if isinstance(token, str): 
+            location = self.get_alloc_mapping(token)
+            self.asm.append((op, location))
+        elif isinstance(token, int):
+            self.asm.append(('set', self.top_of_stack, token))
+            self.asm.append((op, self.top_of_stack))
 
-def set_variable(assignee, value):
-    if isinstance(value, str): 
-        asm.append(('load', alloc[value]))
-        asm.append(('store', alloc[assignee]))
-    elif isinstance(value, int):
-        asm.append(('set', alloc[assignee], value))
-        immediates.pop(0)
+    def set_variable(self, assignee: str, value: any):
+        if isinstance(value, str): 
+            self.asm.append(('load', self.get_alloc_mapping(value)))
+            self.asm.append(('store', self.get_alloc_mapping(assignee)))
+        elif isinstance(value, int):
+            self.asm.append(('set', self.get_alloc_mapping(assignee), value))
 
-# Translate
-parent_funcname = 'fibbonaci'
-asm = []
-for i, tokens in enumerate(code):
-    tokenstring = " ".join([str(t) for t in tokens])
-    match tokens[0]:
-        case 'setarg':
-            # prepare call overhead
-            asm.append(('---',))
-        case 'call':
-            # prepare call overhead
-            asm.append(('if', 'always', tokens[1]))
-        case 'return':
-            # prepare return overhead
-            asm.append(('---',))
-        case 'label':
-            asm.append(('label', f"func.{tokens[1]}"))
-        case 'if':
-            asm.append(('if', tokens[1], f"func.{tokens[2]}"))
-        case 'set':
-            set_variable(tokens[1], tokens[2])
-        case 'cmp':
-            load_operand(tokens[1], 'load')
-            load_operand(tokens[2], 'sub')
-        case _:
-            load_operand(tokens[2], 'load')
-            load_operand(tokens[3], tokens[0])
-            asm.append(('store', alloc[tokens[1]]))
-            
-                
+    def compile_function(self, funcname: str) -> None:
+        for tokens in self.code:
+            match tokens[0]:
+                case 'setarg':
+                    # prepare call overhead
+                    self.asm.append(('---',))
+                case 'call':
+                    # prepare call overhead
+                    self.asm.append(('if', 'always', tokens[1]))
+                case 'return':
+                    # prepare return overhead
+                    self.asm.append(('---',))
+                case 'label':
+                    self.asm.append(('label', f"{funcname}.{tokens[1]}"))
+                case 'if':
+                    self.asm.append(('if', tokens[1], f"{funcname}.{tokens[2]}"))
+                case 'set':
+                    self.set_variable(tokens[1], tokens[2])
+                case 'cmp':
+                    self.take_operand(tokens[1], 'load')
+                    self.take_operand(tokens[2], 'sub')
+                case _:
+                    self.take_operand(tokens[2], 'load')
+                    self.take_operand(tokens[3], tokens[0])
+                    self.asm.append(('store', self.get_alloc_mapping(tokens[1])))
 
-for line in asm:
+ir = SimplicIR(IR['fibbonaci'])
+ir.compile_function('fibbonaci')
+
+for line in ir.asm:
     for tok in line:
         print(tok, end='\t')
     print()
