@@ -1,35 +1,7 @@
 IR = {
-    "somefunc" : [
-        [
-            "x", "y", "z"
-        ],
-        [
-            ('label',   'start'),
-            ('set',     'a', 0),
-            ('set',     'b', 1),
-            ('label',   'loop'),
-            ('add',     'a', 'a', 1),
-            ('set',     'i', 2),
-            ('add',     'j', 'b', 3),
-            ('add',     'a', 'j', 'i'),
-            ('set',     'k', 'j'),   # variable k should recycle i
-            ('cmp',     'a', 20),
-            ('if',      'less', 'loop'),
-            ('return',  'b'),
-
-            # # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
-            # ('loadm', 'b', 'c'),
-            # ('storem', 12, 'c')
-
-            # # handling function calls
-            # ('setargs', 'a', 'b', 'c'),
-            # ('call', 'otherfunc'),
-            # ('setret', 'a'),
-        ]
-    ],
     "fibbonaci" : [
         [
-
+            
         ],
         [
             ('label', 'start'),
@@ -45,6 +17,14 @@ IR = {
             ('cmp',     'counter',      24),
             ('if', 'less', 'loop')
 
+            # # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
+            # ('loadm', 'b', 'c'),
+            # ('storem', 12, 'c')
+
+            # # handling function calls
+            # ('setargs', 'a', 'b', 'c'),
+            # ('call', 'otherfunc'),
+            # ('setret', 'a'),
         ]
     ]
 }
