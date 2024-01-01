@@ -1,21 +1,21 @@
 label   fibbonaci.start
-set     3       1
-set     4       1
-set     5       0
-set     6       2
+set     1       1     
+set     2       1     
+set     3       0     
+set     4       2     
 label   fibbonaci.loop
-load    3
-add     4
-store   5
-load    4
+load    1
+add     2
 store   3
-load    5
+load    2
+store   1
+load    3
+store   2
+load    4
+set     5       1
+add     5
 store   4
-load    6
-set     7       1
-add     7
-store   6
-load    6
-set     7       24
-sub     7
+load    4
+set     5       24
+sub     5
 if      less    fibbonaci.loop

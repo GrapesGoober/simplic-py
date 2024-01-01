@@ -1,7 +1,7 @@
 IR = {
     "fibbonaci" : [
         [
-            'a', 'b', 'c'
+            'start', 'previous', 'current', 'next', 'counter'
         ],
         [
             ('label', 'start'),
@@ -33,21 +33,16 @@ IR = {
 class SimplicIR:
 
     def __init__(self, funcdef: list) -> None:
-        self.args = funcdef[0]
         self.code = funcdef[1]
-        self.alloc = {v:i for i, v in enumerate(self.args)}
-        self.top_of_stack = len(self.args) 
         self.asm = []
 
-    def get_alloc_mapping(self, variable: str):
-        if variable not in self.alloc:
-            self.alloc[variable] = self.top_of_stack
-            self.top_of_stack += 1
-        return self.alloc[variable]
+    def map_variables(self, variables: list):
+        self.alloc = {v:i for i, v in enumerate(variables)}
+        self.top_of_stack = len(variables) 
 
     def take_operand(self, token: str, op: str):
         if isinstance(token, str): 
-            location = self.get_alloc_mapping(token)
+            location = self.alloc[token]
             self.asm.append((op, location))
         elif isinstance(token, int):
             self.asm.append(('set', self.top_of_stack, token))
@@ -55,10 +50,10 @@ class SimplicIR:
 
     def set_variable(self, assignee: str, value: any):
         if isinstance(value, str): 
-            self.asm.append(('load', self.get_alloc_mapping(value)))
-            self.asm.append(('store', self.get_alloc_mapping(assignee)))
+            self.asm.append(('load', self.alloc[value]))
+            self.asm.append(('store', self.alloc[assignee]))
         elif isinstance(value, int):
-            self.asm.append(('set', self.get_alloc_mapping(assignee), value))
+            self.asm.append(('set', self.alloc[assignee], value))
 
     def compile_function(self, funcname: str) -> None:
         for tokens in self.code:
@@ -84,9 +79,10 @@ class SimplicIR:
                 case _:
                     self.take_operand(tokens[2], 'load')
                     self.take_operand(tokens[3], tokens[0])
-                    self.asm.append(('store', self.get_alloc_mapping(tokens[1])))
+                    self.asm.append(('store', self.alloc[tokens[1]]))
 
 ir = SimplicIR(IR['fibbonaci'])
+ir.map_variables(IR['fibbonaci'][0])
 ir.compile_function('fibbonaci')
 
 for line in ir.asm:
