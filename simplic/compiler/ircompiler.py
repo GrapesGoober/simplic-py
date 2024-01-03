@@ -19,7 +19,6 @@ IR = {
             ('cmp',     'counter',      'max'),
             ('if', 'less', 'loop')
 
-            # # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
             # ('loadm', 'b', 'c'),
             # ('storem', 12, 'c')
 
