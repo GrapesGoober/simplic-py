@@ -1,7 +1,7 @@
 IR = {
     "fibbonaci" : [
         [
-            'start', 'previous', 'current', 'next', 'counter'
+            'previous', 'current', 'next', 'counter', 'incr', 'max'
         ],
         [
             ('label', 'start'),
@@ -9,12 +9,14 @@ IR = {
             ('set',     'current',      1),
             ('set',     'next',         0),
             ('set',     'counter',      2),
+            ('set',     'incr',         1),
+            ('set',     'max',          24),
             ('label', 'loop'),
             ('add',     'next',         'previous', 'current'),
-            ('set',     'previous',     'current'),
-            ('set',     'current',      'next'),
-            ('add',     'counter',      'counter', 1),
-            ('cmp',     'counter',      24),
+            ('move',    'previous',     'current'),
+            ('move',    'current',      'next'),
+            ('add',     'counter',      'counter', 'incr'),
+            ('cmp',     'counter',      'max'),
             ('if', 'less', 'loop')
 
             # # memory load IS AN OPERATION, since it can take either stack variable or ANOTHER IMMEDIATE
@@ -38,22 +40,6 @@ class SimplicIR:
 
     def map_variables(self, variables: list):
         self.alloc = {v:i for i, v in enumerate(variables)}
-        self.top_of_stack = len(variables) 
-
-    def take_operand(self, token: str, op: str):
-        if isinstance(token, str): 
-            location = self.alloc[token]
-            self.asm.append((op, location))
-        elif isinstance(token, int):
-            self.asm.append(('set', self.top_of_stack, token))
-            self.asm.append((op, self.top_of_stack))
-
-    def set_variable(self, assignee: str, value: any):
-        if isinstance(value, str): 
-            self.asm.append(('load', self.alloc[value]))
-            self.asm.append(('store', self.alloc[assignee]))
-        elif isinstance(value, int):
-            self.asm.append(('set', self.alloc[assignee], value))
 
     def compile_function(self, funcname: str) -> None:
         for tokens in self.code:
@@ -72,13 +58,16 @@ class SimplicIR:
                 case 'if':
                     self.asm.append(('if', tokens[1], f"{funcname}.{tokens[2]}"))
                 case 'set':
-                    self.set_variable(tokens[1], tokens[2])
+                    self.asm.append(('set', self.alloc[tokens[1]], tokens[2]))
+                case 'move':
+                    self.asm.append(('load', self.alloc[tokens[2]]))
+                    self.asm.append(('store', self.alloc[tokens[1]]))
                 case 'cmp':
-                    self.take_operand(tokens[1], 'load')
-                    self.take_operand(tokens[2], 'sub')
+                    self.asm.append(('load', self.alloc[tokens[1]]))
+                    self.asm.append(('sub', self.alloc[tokens[2]]))
                 case _:
-                    self.take_operand(tokens[2], 'load')
-                    self.take_operand(tokens[3], tokens[0])
+                    self.asm.append(('load', self.alloc[tokens[2]]))
+                    self.asm.append((tokens[0], self.alloc[tokens[3]]))
                     self.asm.append(('store', self.alloc[tokens[1]]))
 
 ir = SimplicIR(IR['fibbonaci'])
