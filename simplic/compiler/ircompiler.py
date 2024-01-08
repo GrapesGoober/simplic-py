@@ -2,6 +2,9 @@ IR = {
     "fibbonaci" : [
         [
             'previous', 'current', 'next', 'counter', 'incr', 'max'
+
+            ,"7", "8", "9", "A", "B", "C", "D", 'E', "F", "11", '12',
+            "X", "Y"
         ],
         [
             ('label', 'start'),
@@ -16,8 +19,17 @@ IR = {
             ('move',    'previous',     'current'),
             ('move',    'current',      'next'),
             ('add',     'counter',      'counter', 'incr'),
+            
+            # some rando assignment junk to test the variables X Y
+            ('move',    'X',            'counter'),
+            ('add',     'Y',            'Y', 'X'),
+
             ('cmp',     'counter',      'max'),
-            ('if', 'less', 'loop')
+            ('if', 'less', 'loop'),
+
+            # assign X Y to E F
+            ('move',    'D',            'X'),
+            ('move',    'E',            'Y'),
 
             # ('loadm', 'b', 'c'),
             # ('storem', 12, 'c')
@@ -36,9 +48,20 @@ class SimplicIR:
     def __init__(self, funcdef: list) -> None:
         self.code = funcdef[1]
         self.asm = []
+        self.current_window = 0
 
     def map_variables(self, variables: list):
-        self.alloc = {v:i for i, v in enumerate(variables)}
+        self.alloc = {v:i+1 for i, v in enumerate(variables)}
+        self.alloc['#return_ptr'] = 0
+    
+    def get_var(self, variable):
+        window_offset = self.alloc[variable] // 16 - self.current_window
+        self.current_window += window_offset
+        if window_offset < 0:
+            [ self.asm.append( ('stack', 'pop') ) for i in range(-window_offset) ]
+        elif window_offset > 0:
+            [ self.asm.append( ('stack', 'push') ) for i in range(window_offset) ]
+        return self.alloc[variable] % 16
 
     def compile_function(self, funcname: str) -> None:
         for tokens in self.code:
@@ -57,17 +80,17 @@ class SimplicIR:
                 case 'if':
                     self.asm.append(('if', tokens[1], f"{funcname}.{tokens[2]}"))
                 case 'set':
-                    self.asm.append(('set', self.alloc[tokens[1]], tokens[2]))
+                    self.asm.append(('set', self.get_var(tokens[1]), tokens[2]))
                 case 'move':
-                    self.asm.append(('load', self.alloc[tokens[2]]))
-                    self.asm.append(('store', self.alloc[tokens[1]]))
+                    self.asm.append(('load', self.get_var(tokens[2])))
+                    self.asm.append(('store', self.get_var(tokens[1])))
                 case 'cmp':
-                    self.asm.append(('load', self.alloc[tokens[1]]))
-                    self.asm.append(('sub', self.alloc[tokens[2]]))
+                    self.asm.append(('load', self.get_var(tokens[1])))
+                    self.asm.append(('sub', self.get_var(tokens[2])))
                 case _:
-                    self.asm.append(('load', self.alloc[tokens[2]]))
-                    self.asm.append((tokens[0], self.alloc[tokens[3]]))
-                    self.asm.append(('store', self.alloc[tokens[1]]))
+                    self.asm.append(('load', self.get_var(tokens[2])))
+                    self.asm.append((tokens[0], self.get_var(tokens[3])))
+                    self.asm.append(('store', self.get_var(tokens[1])))
 
 ir = SimplicIR(IR['fibbonaci'])
 ir.map_variables(IR['fibbonaci'][0])
