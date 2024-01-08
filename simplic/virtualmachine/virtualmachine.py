@@ -55,7 +55,7 @@ class SimplicVM:
         print(f"  SP\t{self.memory[2]}")
 
         print("stack")
-        for i in range(0xF):
+        for i in range(0x10):
             P = self.memory[2]
             print(f"  {i:0x}\t{self.memory[P - i]}")
 
