@@ -71,16 +71,16 @@ class SimplicAsm:
     # parses operands from tokens list
     def parse_operands(self, tokens: list[str], count: int):
         for _, tok in enumerate(self.get_operands(tokens, count)):
-            if tok in CONDITIONS:       yield CONDITIONS.index(tokens[1])
-            elif tok in STACK_OP:       yield STACK_OP.index(tokens[1])
-            elif tok in self.labels:    yield self.labels[tok]
+            if tok in CONDITIONS:           yield CONDITIONS.index(tokens[1])
+            elif tok in STACK_OP:           yield STACK_OP.index(tokens[1])
+            elif tok in self.labels:        yield self.labels[tok]
             else:
-                try:
-                    if tok.startswith("0x"):    yield int(tok, 16)
-                    elif tok.startswith("0b"):  yield int(tok, 2)
-                    else: yield int(tok, 10)
-                except ValueError:
-                    raise SimplicErr(f"Invalid token '{tok}'")
+                if isinstance(tok, int):    yield tok
+                elif tok.startswith("0x"):  yield int(tok, 16)
+                elif tok.startswith("0b"):  yield int(tok, 2)
+                elif tok.isdigit():         yield int(tok, 10)
+                else: raise SimplicErr(f"Invalid token '{tok}'")
+                    
 
     # tokenizes operands from tokens list, does invalid cases check
     def get_operands(self, tokens: list[str], count: int):
