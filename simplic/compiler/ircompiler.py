@@ -1,12 +1,11 @@
 class SimplicIR:
 
-    def __init__(self, funcdef: list) -> None:
-        self.code = funcdef[1]
+    def __init__(self, ircode: list, name: str) -> None:
+        self.name = name
+        self.code = ircode[1]
         self.asm = []
         self.current_window = 0
-
-    def map_variables(self, variables: list):
-        self.alloc = {v:i+1 for i, v in enumerate(variables)}
+        self.alloc = {v:i+1 for i, v in enumerate(ircode[0])}
         self.alloc['#return_ptr'] = 0
     
     def get_var(self, variable):
@@ -18,7 +17,7 @@ class SimplicIR:
             [ self.asm.append( ('stack', 'push') ) for i in range(window_offset) ]
         return self.alloc[variable] % 16
 
-    def compile_function(self, funcname: str) -> None:
+    def compile(self) -> None:
         for tokens in self.code:
             match tokens[0]:
                 case 'setarg':
@@ -31,9 +30,9 @@ class SimplicIR:
                     # prepare return overhead
                     self.asm.append(('---',))
                 case 'label':
-                    self.asm.append(('label', f"{funcname}.{tokens[1]}"))
+                    self.asm.append(('label', f"{self.name}.{tokens[1]}"))
                 case 'if':
-                    self.asm.append(('if', tokens[1], f"{funcname}.{tokens[2]}"))
+                    self.asm.append(('if', tokens[1], f"{self.name}.{tokens[2]}"))
                 case 'set':
                     self.asm.append(('set', self.get_var(tokens[1]), tokens[2]))
                 case 'move':
