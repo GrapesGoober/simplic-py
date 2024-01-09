@@ -44,10 +44,13 @@ class SimplicAsm:
                 case _:             self.PC += 1
 
     # compile current ASM to hex file
-    def compile(self, filename: str) -> None:
+    def compile(self) -> list[int]:
         for self.iter, tokens in enumerate(self.asm):
             if not tokens or tokens[0] == 'label': continue
             self.bytecodes += self.parse_instr(tokens)
+        return self.bytecodes
+    
+    def to_hexfile(self, filename: str) -> None:
         with open(filename, 'w') as f:
             for i, b in enumerate(self.bytecodes):
                 newline = '\n' if ((i + 1) % 16 == 0) else ''

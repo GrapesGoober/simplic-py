@@ -17,7 +17,7 @@ class SimplicIR:
             [ self.asm.append( ('stack', 'push') ) for i in range(window_offset) ]
         return self.alloc[variable] % 16
 
-    def compile(self) -> None:
+    def compile(self) -> list[tuple[str]]:
         for tokens in self.code:
             match tokens[0]:
                 case 'setarg':
@@ -45,3 +45,5 @@ class SimplicIR:
                     self.asm.append(('load', self.get_var(tokens[2])))
                     self.asm.append((tokens[0], self.get_var(tokens[3])))
                     self.asm.append(('store', self.get_var(tokens[1])))
+
+        return self.asm

@@ -5,11 +5,17 @@ class SimplicVM:
         self.memory         = {i: 0 for i in range(0x10000)}
         self.memory[2]      = 0xFFFF    # Stack Pointer count reverses
 
-    def load_program(self, filename: str) -> None:
+    # load program from hex file
+    def from_file(self, filename: str) -> None:
         with open(filename, 'r') as f:
             for i, v in enumerate(f.read().split()):
                 self.instructions[i] = int(v, 16) & 0xFF
+    
+    # load program from a list of bytecodes
+    def from_list(self, bytecodes: list[int]) -> None:
+        for i, v in enumerate(bytecodes): self.instructions[i]  = v
 
+    # execute the current instruction
     def execute(self) -> None:
         mem, instr = self.memory, self.instructions
         PC, A, SP = mem[0], mem[1], mem[2]
@@ -46,6 +52,7 @@ class SimplicVM:
         mem[2]      = SP        & 0xFFFF
         mem[SP - I] = V         & 0xFFFF
 
+    # run program
     def run(self) -> None:
         while self.memory[0x0] < 0xFFFF:
             self.execute()
