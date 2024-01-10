@@ -2,7 +2,7 @@ from simplic import SimplicVM, SimplicIR, SimplicAsm, SimplicErr, error_print
 
 if __name__ == '__main__':
 
-    from test_codes.IRfib import fibbonaci
+    from test_codes.IRtests import fibbonaci
     ir = SimplicIR(fibbonaci, 'fibbonaci')
     asmcode = ir.compile()
 

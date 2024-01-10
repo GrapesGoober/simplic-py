@@ -54,7 +54,7 @@ add_til_ten = [
         ("add", "result", "arg", "step"),
         ("setargs", "result"),
         ("call", "add_till_ten"),
-        ("setrets", "result")
+        ("setrets", "result"),
         ("return", "result")
     ]
 ]
