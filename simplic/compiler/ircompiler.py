@@ -8,14 +8,20 @@ class SimplicIR:
         self.alloc = {v:i+1 for i, v in enumerate(ircode[0])}
         self.alloc['#return_ptr'] = 0
     
-    def get_var(self, variable):
+    def get_alloc(self, variable) -> int:
+        return self.alloc[variable] % 16
+    
+    def slide_to(self, variable) -> list[tuple[str]]:
         window_offset = self.alloc[variable] // 16 - self.current_window
         self.current_window += window_offset
         if window_offset < 0:
-            [ self.asm.append( ('stack', 'pop') ) for i in range(-window_offset) ]
+            return [('stack', 'pop')] * -window_offset
         elif window_offset > 0:
-            [ self.asm.append( ('stack', 'push') ) for i in range(window_offset) ]
-        return self.alloc[variable] % 16
+            return [('stack', 'push')] * window_offset
+        else: return []
+    
+    def take_var(self, op: str, variable: str) -> list[tuple[str]]:
+        return self.slide_to(variable) + [(op, self.get_alloc(variable))]
 
     def compile(self) -> list[tuple[str]]:
         for tokens in self.code:
@@ -34,16 +40,17 @@ class SimplicIR:
                 case 'if':
                     self.asm.append(('if', tokens[1], f"{self.name}.{tokens[2]}"))
                 case 'set':
-                    self.asm.append(('set', self.get_var(tokens[1]), tokens[2]))
+                    var, value = tokens[1:]
+                    self.asm += self.slide_to(var) + [('set', self.get_alloc(var), value)]
                 case 'move':
-                    self.asm.append(('load', self.get_var(tokens[2])))
-                    self.asm.append(('store', self.get_var(tokens[1])))
+                    dest, src = tokens[1:]
+                    self.asm += self.take_var('load', src) + self.take_var('store', dest)
                 case 'cmp':
-                    self.asm.append(('load', self.get_var(tokens[1])))
-                    self.asm.append(('sub', self.get_var(tokens[2])))
+                    a, b = tokens[1:]
+                    self.asm += self.take_var('load', a) + self.take_var('sub', b)
                 case _:
-                    self.asm.append(('load', self.get_var(tokens[2])))
-                    self.asm.append((tokens[0], self.get_var(tokens[3])))
-                    self.asm.append(('store', self.get_var(tokens[1])))
+                    opcode, dest, a, b = tokens
+                    self.asm += self.take_var('load', a) + self.take_var(opcode, b)
+                    self.asm += self.take_var('store', dest)
 
         return self.asm
