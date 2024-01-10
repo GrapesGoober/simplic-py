@@ -12,13 +12,17 @@ class SimplicIR:
         return self.alloc[variable] % 16
     
     def slide_to(self, variable) -> list[tuple[str]]:
-        window_offset = self.alloc[variable] // 16 - self.current_window
-        self.current_window += window_offset
-        if window_offset < 0:
-            return [('stack', 'pop')] * -window_offset
-        elif window_offset > 0:
-            return [('stack', 'push')] * window_offset
+        distance = self.alloc[variable] // 16 - self.current_window
+        self.current_window += distance
+        if distance < 0:
+            return [('stack', 'pop')] * -distance
+        elif distance > 0:
+            return [('stack', 'push')] * distance
         else: return []
+    
+    def slide_to_new(self, offset) -> list[tuple[str]]:
+        offset_slide = [('stack', 'push')] * (offset // 16 + 1)
+        return self.slide_to(self.alloc.keys()[-1]) + offset_slide
     
     def take_var(self, op: str, variable: str) -> list[tuple[str]]:
         return self.slide_to(variable) + [(op, self.get_alloc(variable))]
@@ -26,9 +30,14 @@ class SimplicIR:
     def compile(self) -> list[tuple[str]]:
         for tokens in self.code:
             match tokens[0]:
-                case 'setarg':
-                    # prepare call overhead
-                    self.asm.append(('---',))
+                case 'setargs':
+                    for i, arg in enumerate(tokens[1:]):
+                        self.asm += self.take_var('load', arg)
+                        self.asm += self.slide_to_new(i) + ('store', i % 16),
+                case 'setrets':
+                    for i, arg in enumerate(tokens[1:]):
+                        self.asm += self.take_var('load', arg)
+                        self.asm += self.slide_to_new(i) + ('store', i % 16),
                 case 'call':
                     # prepare call overhead
                     self.asm.append(('if', 'always', tokens[1]))
