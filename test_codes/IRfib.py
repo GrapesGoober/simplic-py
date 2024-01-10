@@ -36,6 +36,25 @@ fibbonaci = [
         # # handling function calls
         # ('setargs', 'a', 'b', 'c'),
         # ('call', 'otherfunc'),
-        # ('setret', 'a'),
+        # ('setrets', 'a'),
+    ]
+]
+
+add_til_ten = [
+    [
+        "arg", "result", "ten", "step"
+    ],
+    [
+        ("set", "ten", 10),
+        ("set", "step", 1),
+        ("cmp", "arg", "ten"),
+        ("if", "less", "recurse"),
+        ("return", "arg"),
+        ("label", "recurse"),
+        ("add", "result", "arg", "step"),
+        ("setargs", "result"),
+        ("call", "add_till_ten"),
+        ("setrets", "result")
+        ("return", "result")
     ]
 ]
