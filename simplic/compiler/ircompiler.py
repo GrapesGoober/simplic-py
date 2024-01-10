@@ -6,7 +6,7 @@ class SimplicIR:
         self.asm = []
         self.current_window = 0
         self.alloc = {v:i+1 for i, v in enumerate(ircode[0])}
-        self.alloc['#return_ptr'] = 0
+        self.alloc['#RETURN'] = 0
     
     def get_alloc(self, variable) -> int:
         return self.alloc[variable] % 16
