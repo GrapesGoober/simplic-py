@@ -51,7 +51,7 @@ class SimplicIR:
         # load return address, set to PC
         self.asm.append(('---',))
 
-    def compile_label(self, tokens) -> None:
+    def compile_label(self, tokens: tuple[str]) -> None:
         self.asm += ('label', f"{self.name}.{tokens[1]}"),
     
     def compile_if(self, tokens: tuple[str]) -> None:
