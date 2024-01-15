@@ -40,7 +40,7 @@ fibbonaci = [
     ]
 ]
 
-add_til_ten = [
+add_til_ten_recursive = [
     [
         "arg", "result", "ten", "step"
     ],
@@ -56,5 +56,29 @@ add_til_ten = [
         ("call", "add_till_ten"),
         ("setrets", "result"),
         ("return", "result")
+    ]
+]
+
+func_main = [
+    [
+        "result", "number", "exit", "address"
+    ],
+    [
+        ('set', 'number', 12),
+
+        ('set', 'exit', 0xFFF0),
+        ('set', 'address', 0),
+        ('storem', 'address', 'exit'),
+    ]
+]
+
+func_add_ten = [
+    [
+        "arg", "ten", "result"
+    ],
+    [
+        #('set',     'ten', 10),
+        ('add',     'result', 'arg', 'ten'),
+        ('return',  'result')
     ]
 ]

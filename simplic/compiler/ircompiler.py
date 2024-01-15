@@ -4,7 +4,7 @@ class SimplicIR:
         self.alloc = {v:i+1 for i, v in enumerate(ircode[0])}
         self.name = name
         self.code = ircode[1]
-        self.asm = []
+        self.asm = [('label', self.name)]
         self.current_window = 0
         self.return_count = 0
     
@@ -46,8 +46,12 @@ class SimplicIR:
                     self.return_count += 1
                 case 'return':  
                     for i, ret in enumerate(tokens[1:]):
-                        self.asm += self.instr('load', ret) + self.instr('store', self.alloc.keys()[i])
+                        self.asm += self.instr('load', ret)
+                        self.asm += self.instr('store', list(self.alloc)[i])
                     self.asm += self.slide(0) + [('load', 0), ('set', 0, 0), ('storem', 0)]
+                case 'loadm' | 'storem':
+                    self.asm += self.instr('load', tokens[2])
+                    self.asm += self.instr(tokens[0], tokens[1])
                 case 'label':
                     self.asm += ('label', f"{self.name}.{tokens[1]}"),
                 case 'if':
