@@ -9,98 +9,58 @@ class SimplicIR:
         self.return_count = 0
     
     # Get variable allocation relative to window
-    def get_alloc(self, variable: str) -> int:
-        return self.alloc[variable] % 16
+    def get_alloc(self, var: str) -> int:
+        return self.alloc[var] % 16
     
     # Slide current window to the target variable location
-    def slide_to(self, variable: str) -> list[tuple[str]]:
-        distance = self.alloc[variable] // 16 - self.current_window
-        self.current_window += distance
-        if distance < 0:
-            return [('stack', 'pop')] * -distance
-        elif distance > 0:
-            return [('stack', 'push')] * distance
-        else: return []
+    def slide(self, location: str) -> list[tuple[str]]:
+        delta = location // 16 - self.current_window
+        self.current_window += delta
+        if   delta < 0: return [('stack', 'pop')] * -delta
+        elif delta > 0: return [('stack', 'push')] * delta
+        else:           return []
     
-    # Slide current window to a fresh empty window
-    def slide_to_new(self, offset: int) -> list[tuple[str]]:
-        offset_slide = [('stack', 'push')] * (offset // 16 + 1)
-        return self.slide_to(self.alloc.keys()[-1]) + offset_slide
+    def instr(self, op: str, var: str, imm: any = None) -> list[tuple[str]]:
+        if imm != None: return self.slide(self.alloc[var]) + [(op, self.get_alloc(var), imm)]
+        else:           return self.slide(self.alloc[var]) + [(op, self.get_alloc(var))]
     
-    def take_var(self, op: str, variable: str) -> list[tuple[str]]:
-        return self.slide_to(variable) + [(op, self.get_alloc(variable))]
+    def instr_arg(self, op: str, offset: int, imm: any = None) -> list[tuple[str]]:
+        yield self.slide(len(self.alloc) + (offset + 1))
+        if imm != None: yield (op, (offset + 1) % 16, imm),
+        else:           yield (op, (offset + 1) % 16),
     
     # Compile entire IR code to ASM
     def compile(self) -> list[tuple[str]]:
         for tokens in self.code:
             match tokens[0]:
-                case 'setargs': self.compile_setargs(tokens)
-                case 'setrets': self.compile_setrets(tokens)
-                case 'call':    self.compile_call   (tokens)
-                case 'return':  self.compile_return (tokens)
-                case 'label':   self.compile_label  (tokens)
-                case 'if':      self.compile_if     (tokens)
-                case 'set':     self.compile_set    (tokens)
-                case 'move':    self.compile_move   (tokens)
-                case 'cmp':     self.compile_cmp    (tokens)
-                case _:         self.compile_alu    (tokens)
+                case 'setargs': 
+                    for i, arg in enumerate(tokens[1:]):
+                        self.asm += self.instr('load', arg) + self.instr_arg('store', i)
+                case 'setrets': 
+                    for i, ret in enumerate(tokens[1:]):
+                        self.asm += self.instr_arg('load', i) + self.instr('store', ret)
+                case 'call':    
+                    return_label = f"{self.name}.return_{self.return_count}"
+                    self.asm += self.instr_arg('set', -1, return_label)
+                    self.asm += ('if', 'always', tokens[1]), ('label', return_label)
+                    self.return_count += 1
+                case 'return':  
+                    for i, ret in enumerate(tokens[1:]):
+                        self.asm += self.instr('load', ret) + self.instr('store', self.alloc.keys()[i])
+                    self.asm += self.slide(0) + [('load', 0), ('set', 0, 0), ('storem', 0)]
+                case 'label':
+                    self.asm += ('label', f"{self.name}.{tokens[1]}"),
+                case 'if':
+                    self.asm += ('if', tokens[1], f"{self.name}.{tokens[2]}"),
+                case 'set':     
+                    self.asm += self.instr('set', tokens[1], tokens[2])
+                case 'move':
+                    self.asm += self.instr('load', tokens[2]) + self.instr('store', tokens[1])
+                case 'cmp':
+                    self.asm += self.instr('load', tokens[1]) + self.instr('sub', tokens[2])
+                case _:
+                    self.asm += self.instr('load', tokens[2])
+                    self.asm += self.instr(tokens[0], tokens[3])
+                    self.asm += self.instr('store', tokens[1])
 
         return self.asm
-    
-    # Compile 'setargs' instruction
-    def compile_setargs(self, tokens: tuple[str]) -> None:
-        for i, arg in enumerate(tokens[1:]):
-            self.asm += self.take_var('load', arg)
-            self.asm += self.slide_to_new(i) + ('store', i % 16 + 1),
-    
-    # Compile 'setrets' instruction
-    def compile_setrets(self, tokens: tuple[str]) -> None:
-        for i, arg in enumerate(tokens[1:]):
-            self.asm += self.take_var('load', arg)
-            self.asm += self.slide_to_new(i) + ('store', i % 16 + 1),
-
-    # Compile 'call' instruction
-    def compile_call(self, tokens: tuple[str]) -> None:
-        return_label = f"{self.name}.ret{self.return_count}"
-        self.return_count += 1
-        self.asm += self.slide_to_new(0)
-        self.asm += ('set', 0, return_label),
-        self.asm += ('if', 'always', tokens[1]),
-        self.asm += ('label', return_label),
-
-    # Compile 'return' instruction
-    def compile_return(self, tokens: tuple[str]) -> None:
-        # prepare return overhead
-        # load return value, set to return location
-        # load return address, set to PC
-        self.asm.append(('---',))
-
-    # Compile 'label' instruction
-    def compile_label(self, tokens: tuple[str]) -> None:
-        self.asm += ('label', f"{self.name}.{tokens[1]}"),
-    
-    # Compile 'if' instruction
-    def compile_if(self, tokens: tuple[str]) -> None:
-        self.asm += ('if', tokens[1], f"{self.name}.{tokens[2]}"),
-
-    # Compile 'set' instruction
-    def compile_set(self, tokens: tuple[str]) -> None:
-        var, value = tokens[1:]
-        self.asm += self.slide_to(var) + [('set', self.get_alloc(var), value)]
-
-    # Compile 'move' instruction
-    def compile_move(self, tokens: tuple[str]) -> None:
-        dest, src = tokens[1:]
-        self.asm += self.take_var('load', src) + self.take_var('store', dest)
-
-    # Compile 'cmp' instruction
-    def compile_cmp(self, tokens: tuple[str]) -> None:
-        a, b = tokens[1:]
-        self.asm += self.take_var('load', a) + self.take_var('sub', b)
-
-    # Compile generic arithmatic/logic instructions
-    def compile_alu(self, tokens: tuple[str]) -> None:
-        opcode, dest, a, b = tokens
-        self.asm += self.take_var('load', a) + self.take_var(opcode, b)
-        self.asm += self.take_var('store', dest)
-
