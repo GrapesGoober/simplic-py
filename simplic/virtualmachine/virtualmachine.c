@@ -21,7 +21,7 @@ void execute(SimplicVM *vm) {
     uint8_t   Z     = *A == 0;
     uint8_t   N     = *A >> 15;
 
-    switch (OP(vm)) {
+    switch (OP) {
         case 0x0: *V = I16; *PC += 2;       break;
         case 0x1:                           break;  // If
         case 0x2: *A = *V;                  break;  // Load
