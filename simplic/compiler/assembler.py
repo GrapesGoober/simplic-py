@@ -1,8 +1,8 @@
 from simplic.compiler.exceptions import SimplicErr, error_print
 
 OPCODES = [
-    "set",  "if", "stack", "load", "store", "loadm", "storem",  
-    "add", "sub", "lsl", "lsr", "mul", "div", "and", "or", "not"
+    "load", "store", "loadm", "storem", "add", "sub", "lsl", "lsr",
+    "mul", "div", "and", "or", "not", "stack", "set", "if"
 ]
 
 CONDITIONS = [
