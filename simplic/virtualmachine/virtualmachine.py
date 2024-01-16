@@ -21,16 +21,15 @@ class SimplicVM:
         PC, A, SP = mem[0], mem[1], mem[2]
         opcode, I = instr[PC] >> 4, instr[PC] & 0xF
         V = mem[SP - I]
+        I16 = instr[PC + 1] << 8 | instr[PC + 2]
 
         match opcode:
             case 0x0: # Set value to V
-                V = instr[PC + 1] << 8 | instr[PC + 2]
-                PC += 2
+                V, PC = I16, PC + 2
             case 0x1: # If condition
                 Z, N = A == 0, A >> 15
                 cond = [True, N, not (Z or N), Z, not Z, N or Z, not N] 
-                dest = instr[PC + 1] << 8 | instr[PC + 2]
-                PC = dest - 1 if cond[I] else PC + 2
+                PC = I16 - 1 if cond[I] else PC + 2
             case 0x2: # Stack slide
                 SP += 0xFFF0 if I else 0x10                 
             case 0x3: A = V             # Load
