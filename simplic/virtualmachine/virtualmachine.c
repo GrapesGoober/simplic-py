@@ -16,7 +16,8 @@ void execute(SimplicVM *vm) {
     uint8_t   OP    = instr[*PC] >> 4;
     uint8_t   I4    = instr[*PC] & 0xF;
     uint16_t *A     = &mem[1];
-    uint16_t *V     = &mem[2];
+    uint16_t *SP    = &mem[2];
+    uint16_t *V     = &mem[*SP - I4];
     uint16_t  I16   = instr[*PC+1] << 8 | instr[*PC+2];
     uint8_t   Z     = *A == 0;
     uint8_t   N     = *A >> 15;
