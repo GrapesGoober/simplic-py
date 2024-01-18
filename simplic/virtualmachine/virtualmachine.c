@@ -9,12 +9,10 @@ typedef struct SimplicVM {
     uint16_t mem[SIZE];
 } SimplicVM;
 
-void init(SimplicVM *vm, int argc, char* argv[]) {
-    vm -> mem[0] = 0;
-    vm -> mem[1] = 0;
-    vm -> mem[2] = 0xFFFF;
-    for (int i = 0; i < argc; i++) {
-        vm -> instr[i] = strtol(argv[i + 1], NULL, 16) & 0xFF;
+void init(SimplicVM *vm, size_t len, char* instr[]) {
+    vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
+    for (size_t i = 0; i < len; i++) {
+        vm -> instr[i] = strtol(instr[i], NULL, 16);
     }
 }
 
@@ -82,11 +80,8 @@ void print(SimplicVM *vm){
 }
 
 void main(int argc, char *argv[]) {
-    SimplicVM vm = {
-        .instr = {0},
-        .mem = {0}
-    };
-    init(&vm, argc, argv);
+    SimplicVM vm;
+    init(&vm, argc, argv + 1);
     run(&vm);
     print(&vm);
 }
