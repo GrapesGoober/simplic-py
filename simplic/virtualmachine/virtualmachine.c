@@ -1,17 +1,27 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-#define WORD_SIZE 16
+#define SIZE 0x10000
 
 typedef struct SimplicVM {
-    uint8_t  instruction[0xFFFF];
-    uint16_t memory[0xFFFF];
+    uint8_t  instr[SIZE];
+    uint16_t mem[SIZE];
 } SimplicVM;
+
+void init(SimplicVM *vm, int argc, char* argv[]) {
+    vm -> mem[0] = 0;
+    vm -> mem[1] = 0;
+    vm -> mem[2] = 0xFFFF;
+    for (int i = 0; i < argc; i++) {
+        vm -> instr[i] = strtol(argv[i + 1], NULL, 16) & 0xFF;
+    }
+}
 
 void execute(SimplicVM *vm) {
 
-    uint16_t *mem   = &vm->memory;
-    uint16_t *instr = &vm->instruction;
+    uint16_t *mem   = vm->mem;
+    uint8_t  *instr = vm->instr;
     uint16_t *PC    = &mem[0];
     uint8_t   OP    = instr[*PC] >> 4;
     uint8_t   I4    = instr[*PC] & 0xF;
@@ -22,33 +32,65 @@ void execute(SimplicVM *vm) {
     uint8_t   Z     = *A == 0;
     uint8_t   N     = *A >> 15;
 
+    uint8_t cond = 
+        (1 << 0) | (N << 1)  | (~(Z | N) << 2) | 
+        (Z << 3) | (~Z << 4) |  ((Z | N) << 5) | (~N << 6);
+    cond = (cond >> I4) & 1;
+
     switch (OP) {
-        case 0x0: *V = I16; *PC += 2;       break;
-        case 0x1:                           break;  // If
-        case 0x2: *A = *V;                  break;  // Load
-        case 0x3: *V = *A;                  break;  // Store
-        case 0x4: *A = mem[*V];             break;  // Load Pointer
-        case 0x5: mem[*V] = A;              break;  // Store Pointer
-        case 0x6:   break;
-        case 0x7:   break;
-        case 0x8:   break;
-        case 0x9: *A += *V;                 break;  // Add
-        case 0xA: *A -= *V;                 break;  // Sub
-        case 0xB: *A *= *V;                 break;  // Mul
-        case 0xC: *A /= *V;                 break;  // Div
-        case 0xD: *A &= *V;                 break;  // And
-        case 0xE: *A |= *V;                 break;  // Or
-        case 0xF: *A = ~*V;                 break;  // Not
+        case 0x0: *A = *V;              break;  // Load
+        case 0x1: *V = *A;              break;  // Store
+        case 0x2: *A = mem[*V];         break;  // Load Pointer
+        case 0x3: mem[*V] = *A;         break;  // Store Pointer
+        case 0x4: *A +=  *V;            break;  // Add
+        case 0x5: *A -=  *V;            break;  // Sub
+        case 0x6: *A <<= *V;            break;  // LSL
+        case 0x7: *A >>= *V;            break;  // LSR
+        case 0x8: *A *=  *V;            break;  // Mul
+        case 0x9: *A /=  *V;            break;  // Div
+        case 0xA: *A &=  *V;            break;  // And
+        case 0xB: *A |=  *V;            break;  // Or
+        case 0xC: *A =  ~*V;            break;  // Not
+        case 0xD: *SP += (I4 ?                  // Stack Slide
+                0xFFF0 : 0x10);         break; 
+        case 0xE: *V = I16; *PC += 2;   break;  // Set
+        case 0xF: *PC = (cond ?                 // If                                        
+                I16 - 1 : *PC + 2);     break;
     }               
 
     *PC += 1;
 }
 
-void run(SimplicMicrocontroller *vm) {
-    uint16_t *mem = &vm->instr;
-    uint16_t *PC  = mem[0];
+void run(SimplicVM *vm) {
+    uint16_t *PC  = &(vm->mem[0]);
     while (*PC < 0xFFFF) {
         execute(vm);
     }
 }
+
+void print(SimplicVM *vm){
+    printf("internal state\n");
+    printf("  PC\t%d\n", vm -> mem[0]);
+    printf("  A\t%d\n",  vm -> mem[1]);
+    printf("  SP\t%d\n", vm -> mem[2]);
+
+    printf("stack\n");
+    for (int i = 0; i < 0x10; i++) {
+        int SP = vm -> mem[2];
+        printf("  %x\t%d\n", i, vm -> mem[SP - i]);
+    }
+}
+
+void main(int argc, char *argv[]) {
+    SimplicVM vm = {
+        .instr = {0},
+        .mem = {0}
+    };
+    init(&vm, argc, argv);
+    run(&vm);
+    print(&vm);
+}
+
+// gcc simplic\virtualmachine\virtualmachine.c -o simplic\virtualmachine\virtualmachine.exe
+// simplic\virtualmachine\virtualmachine.exe e1 00 01 e2 00 01 e3 00 00 e4 00 02 e5 00 01 e6 00 18 01 42 13 02 11 03 12 04 45 14 04 d1 12 03 42 13 d0 04 56 f1 00 12 d1 02 d0 1d d1 03 d0 1e
 
