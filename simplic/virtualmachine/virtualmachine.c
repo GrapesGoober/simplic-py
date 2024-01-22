@@ -16,8 +16,10 @@ void init(SimplicVM *vm, size_t len, char* instr[]) {
     }
 }
 
+// executes the current instruction cycle
 void execute(SimplicVM *vm) {
 
+    // first, decode the current state
     uint16_t *mem   = vm->mem;
     uint8_t  *instr = vm->instr;
     uint16_t *PC    = &mem[0];
@@ -27,14 +29,14 @@ void execute(SimplicVM *vm) {
     uint16_t *SP    = &mem[2];
     uint16_t *V     = &mem[*SP - I4];
     uint16_t  I16   = instr[*PC+1] << 8 | instr[*PC+2];
-    uint8_t   Z     = *A == 0;
-    uint8_t   N     = *A >> 15;
 
-    uint8_t cond = 
-        (1 << 0) | (N << 1)  | (~(Z | N) << 2) | 
-        (Z << 3) | (~Z << 4) |  ((Z | N) << 5) | (~N << 6);
-    cond = (cond >> I4) & 1;
+    // next, precomputes inputs for certain special instructions
+    uint16_t slide = (I4 ? 0xFFF0 : 0x10);
+    char Z = *A == 0, N = *A >> 15;
+    char cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
+    uint16_t jump = cond[I4] ? I16 - 1 : *PC + 2;
 
+    // execute instruction
     switch (OP) {
         case 0x0: *A = *V;              break;  // Load
         case 0x1: *V = *A;              break;  // Store
@@ -49,13 +51,12 @@ void execute(SimplicVM *vm) {
         case 0xA: *A &=  *V;            break;  // And
         case 0xB: *A |=  *V;            break;  // Or
         case 0xC: *A =  ~*V;            break;  // Not
-        case 0xD: *SP += (I4 ?                  // Stack Slide
-                0xFFF0 : 0x10);         break; 
+        case 0xD: *SP += slide;         break;  // Stack Slide
         case 0xE: *V = I16; *PC += 2;   break;  // Set
-        case 0xF: *PC = (cond ?                 // If                                        
-                I16 - 1 : *PC + 2);     break;
+        case 0xF: *PC = jump;           break;  // If                                        
     }               
 
+    // lastly, increment program counter
     *PC += 1;
 }
 
