@@ -2,15 +2,19 @@
 
 int main(int argc, char *argv[]) {
 
-    // Print each command-line argument
-    printf("Hello World\n");
-    printf("Arguments:\n");
-    if (argc == 1) {
-        printf("Haven't recieved any\n");
+    unsigned char data[0xFF];
+    
+    // Use a loop to read bytes until the end of input (EOF)
+    size_t count = 0;
+    while (scanf("%2hhx", &data[count]) == 1) {
+        count += 1;
     }
-    for (int i = 1; i < argc; i++) {
-        printf("%d: %s\n", i, argv[i]);
+
+    for (int i = 0; i < 0xFF; i++) {
+        printf("%x ", data[i]);
     }
+    printf("done\n");
+
 
     return 0;
 }
