@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdbool.h>
 
-#define SIZE 0x10000
-typedef uint16_t word;
-typedef uint8_t byte;
+#define SIZE 0x10000        // default to 16 bit address size
+typedef uint16_t    word;   // default to 16 bit word size
+typedef uint8_t     byte;   // define a byte as an 8-bit word
 
 typedef struct SimplicVM {
     byte instr[SIZE];
@@ -27,8 +27,8 @@ void execute(SimplicVM *vm) {
 
     // next, precomputes inputs for stack & if instructions
     word slide = I4 ? 0xFFF0 : 0x10;
-    byte Z = *A == 0, N = *A >> 15;
-    byte cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
+    bool Z = *A == 0, N = *A >> 15;
+    bool cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
     word jump = cond[I4] ? I16 - 1 : *PC + 2;
 
     // execute instruction
