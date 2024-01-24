@@ -3,7 +3,9 @@ from simplic import SimplicVM, SimplicIR, SimplicAsm, SimplicErr, error_print
 if __name__ == '__main__':
 
     with open("test_codes\\test.hex", 'w') as f:
-        [f.write(f'{i:02x} ') for i in range(0x00, 0xFF)]
+        for i in range(0x10):
+            [f.write(f'{i:1x}{j:1x} ') for j in range(0x10)]
+            f.write('\n')
 
 
 
