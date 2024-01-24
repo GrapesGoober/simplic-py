@@ -13,9 +13,8 @@ typedef struct SimplicVM {
 
 void init(SimplicVM *vm, size_t len, char* instr[]) {
     vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
-    for (size_t i = 0; i < len; i++) {
-        vm -> instr[i] = strtol(instr[i], NULL, 16);
-    }
+    word count = 0;
+    while (scanf("%2hhx", &vm->instr[count++]) == 1);
 }
 
 // executes the current instruction cycle
@@ -90,5 +89,5 @@ void main(int argc, char *argv[]) {
 }
 
 // gcc simplic\virtualmachine\virtualmachine.c -o simplic\virtualmachine\virtualmachine.exe
-// simplic\virtualmachine\virtualmachine.exe e1 00 01 e2 00 01 e3 00 00 e4 00 02 e5 00 01 e6 00 18 01 42 13 02 11 03 12 04 45 14 04 d1 12 03 42 13 d0 04 56 f1 00 12 d1 02 d0 1d d1 03 d0 1e
+// simplic\virtualmachine\virtualmachine.exe < test_codes\test.hex
 

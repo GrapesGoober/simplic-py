@@ -2,24 +2,25 @@ from simplic import SimplicVM, SimplicIR, SimplicAsm, SimplicErr, error_print
 
 if __name__ == '__main__':
 
+
+
+
+    from test_codes.IRtests import func_main, func_add_ten, fibbonaci
+    ir = SimplicIR(fibbonaci, 'fibbonaci')
+    asmcode = ir.compile()
+    # ir = SimplicIR(func_add_ten, 'func_add_ten')
+    # asmcode += ir.compile()
+
+    
+    asm = SimplicAsm()
+    asm.from_list(asmcode)
+    bytecodes = asm.compile()
+    
+
     with open("test_codes\\test.hex", 'w') as f:
-        for i in range(0x10):
-            [f.write(f'{i:1x}{j:1x} ') for j in range(0x10)]
-            f.write('\n')
+        for i, bytecode in enumerate(bytecodes):
+            f.write(f'{bytecode:02x} ' + ('\n' if (i + 1) % 16 == 0 else ''))
 
-
-
-    # from test_codes.IRtests import func_main, func_add_ten, fibbonaci
-    # ir = SimplicIR(func_main, 'func_main')
-    # asmcode = ir.compile()
-    # # ir = SimplicIR(func_add_ten, 'func_add_ten')
-    # # asmcode += ir.compile()
-
-    
-    # asm = SimplicAsm()
-    # asm.from_list(asmcode)
-    # bytecodes = asm.compile()
-    
     # # handle error using
     # # error_print(asmfile, asm.iter, e.message)
     # [print(l) for l in asmcode]
