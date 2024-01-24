@@ -3,10 +3,12 @@
 #include <stdlib.h>
 
 #define SIZE 0x10000
+typedef uint16_t word;
+typedef uint8_t byte;
 
 typedef struct SimplicVM {
-    uint8_t  instr[SIZE];
-    uint16_t mem[SIZE];
+    byte instr[SIZE];
+    word mem[SIZE];
 } SimplicVM;
 
 void init(SimplicVM *vm, size_t len, char* instr[]) {
@@ -20,21 +22,21 @@ void init(SimplicVM *vm, size_t len, char* instr[]) {
 void execute(SimplicVM *vm) {
 
     // first, decode the current state
-    uint16_t *mem   = vm->mem;
-    uint8_t  *instr = vm->instr;
-    uint16_t *PC    = &mem[0];
-    uint8_t   OP    = instr[*PC] >> 4;
-    uint8_t   I4    = instr[*PC] & 0xF;
-    uint16_t *A     = &mem[1];
-    uint16_t *SP    = &mem[2];
-    uint16_t *V     = &mem[*SP - I4];
-    uint16_t  I16   = instr[*PC+1] << 8 | instr[*PC+2];
+    word *mem   = vm->mem;
+    byte *instr = vm->instr;
+    word *PC    = &mem[0];
+    word *A     = &mem[1];
+    word *SP    = &mem[2];
+    byte  OP    = instr[*PC] >> 4;
+    byte  I4    = instr[*PC] & 0xF;
+    word *V     = &mem[*SP - I4];
+    word  I16   = instr[*PC + 1] << 8 | instr[*PC + 2];
 
     // next, precomputes inputs for certain special instructions
-    uint16_t slide = (I4 ? 0xFFF0 : 0x10);
-    char Z = *A == 0, N = *A >> 15;
-    char cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
-    uint16_t jump = cond[I4] ? I16 - 1 : *PC + 2;
+    word slide = I4 ? 0xFFF0 : 0x10;
+    byte Z = *A == 0, N = *A >> 15;
+    byte cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
+    word jump = cond[I4] ? I16 - 1 : *PC + 2;
 
     // execute instruction
     switch (OP) {
@@ -61,7 +63,7 @@ void execute(SimplicVM *vm) {
 }
 
 void run(SimplicVM *vm) {
-    uint16_t *PC  = &(vm->mem[0]);
+    word *PC  = &(vm->mem[0]);
     while (*PC < 0xFFFF) {
         execute(vm);
     }
