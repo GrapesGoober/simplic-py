@@ -65,8 +65,7 @@ func_main = [
     ],
     [
         ('set', 'number', 12),
-
-        ('set', 'exit', 0xFFFF),
+        ('set', 'exit', 0xFFFE),
         ('set', 'address', 0),
         ('storem', 'address', 'exit'),
     ]
