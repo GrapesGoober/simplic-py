@@ -11,12 +11,6 @@ typedef struct SimplicVM {
     word mem[SIZE];
 } SimplicVM;
 
-void init(SimplicVM *vm, size_t len, char* instr[]) {
-    vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
-    word count = 0;
-    while (scanf("%2hhx", &vm->instr[count++]) == 1);
-}
-
 // executes the current instruction cycle
 void execute(SimplicVM *vm) {
 
@@ -31,7 +25,7 @@ void execute(SimplicVM *vm) {
     word *V     = &mem[*SP - I4];
     word  I16   = instr[*PC + 1] << 8 | instr[*PC + 2];
 
-    // next, precomputes inputs for certain special instructions
+    // next, precomputes inputs for stack & if instructions
     word slide = I4 ? 0xFFF0 : 0x10;
     byte Z = *A == 0, N = *A >> 15;
     byte cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
@@ -61,31 +55,28 @@ void execute(SimplicVM *vm) {
     *PC += 1;
 }
 
-void run(SimplicVM *vm) {
-    word *PC  = &(vm->mem[0]);
-    while (*PC < 0xFFFF) {
-        execute(vm);
-    }
-}
+void main() {
+    SimplicVM vm;
+    word *PC = &vm.mem[0], *SP = &vm.mem[2];
 
-void print(SimplicVM *vm){
+    // initialize vm
+    *PC = 0, *SP = 0xFFFF;
+    word count = 0;
+    while (scanf("%2hhx", &vm.instr[count++]) == 1);
+
+    // run vm with a halt condition
+    while (*PC != 0xFFFF) {
+        execute(&vm);
+    }
+    
     printf("internal state\n");
-    printf("  PC\t%d\n", vm -> mem[0]);
-    printf("  A\t%d\n",  vm -> mem[1]);
-    printf("  SP\t%d\n", vm -> mem[2]);
+    printf("  PC\t%d\n", *PC);
+    printf("  SP\t%d\n", *SP);
 
     printf("stack\n");
     for (int i = 0; i < 0x10; i++) {
-        int SP = vm -> mem[2];
-        printf("  %x\t%d\n", i, vm -> mem[SP - i]);
+        printf("  %x\t%d\n", i, vm.mem[*SP - i]);
     }
-}
-
-void main(int argc, char *argv[]) {
-    SimplicVM vm;
-    init(&vm, argc, argv + 1);
-    run(&vm);
-    print(&vm);
 }
 
 // gcc simplic\virtualmachine\virtualmachine.c -o simplic\virtualmachine\virtualmachine.exe
