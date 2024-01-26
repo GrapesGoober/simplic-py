@@ -1,9 +1,12 @@
 fibbonaci = [
     [
-        'previous', 'current', 'next', 'counter', 'incr', 'max'
+        'previous', 'current', 'next', 'counter', 'incr', 'max',
 
-        ,"7", "8", "9", "A", "B", "C", "D", 'E', "F", "11", '12',
-        "X", "Y"
+        "exit", "address",
+
+        "7", "8", "9", "A", "B", "C", "D", 'E', "F", "11", '12',
+        "X", "Y", 
+        
     ],
     [
         ('label', 'start'),
@@ -29,6 +32,11 @@ fibbonaci = [
         # assign X Y to E F
         ('move',    'D',            'X'),
         ('move',    'E',            'Y'),
+
+        # halt condition
+        ('set', 'exit', 0xFFFE),
+        ('set', 'address', 0),
+        ('storem', 'address', 'exit'),
 
         # ('loadm', 'b', 'c'),
         # ('storem', 12, 'c')
