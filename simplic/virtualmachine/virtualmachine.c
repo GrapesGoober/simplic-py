@@ -64,9 +64,14 @@ void main() {
     word count = 0;
     while (scanf("%2hhx", &vm.instr[count++]) == 1);
 
-    // run vm with a halt condition
+    // run vm with a halt condition & handle IO protocol
     while (*PC != 0xFFFF) {
         execute(&vm);
+        switch (vm.mem[3]) {
+            case 1:  printf("%c", vm.mem[4]); break;      // output to stdout
+            case 2:  scanf("%c", &vm.mem[4]); break;      // recieve character from stdin
+        }
+        vm.mem[3] = 0;
     }
     
     printf("internal state\n");
