@@ -6,17 +6,10 @@
 typedef uint16_t    word;   // default to 16 bit word size
 typedef uint8_t     byte;   // define a byte as an 8-bit word
 
-typedef struct SimplicVM {
-    byte instr[SIZE];
-    word mem[SIZE];
-} SimplicVM;
-
 // executes the current instruction cycle
-void execute(SimplicVM *vm) {
+void execute(word *mem, byte *instr) {
 
     // first, decode the current state
-    word *mem   = vm->mem;
-    byte *instr = vm->instr;
     word *PC    = &mem[0];
     word *A     = &mem[1];
     word *SP    = &mem[2];
@@ -56,31 +49,32 @@ void execute(SimplicVM *vm) {
 }
 
 void main() {
-    SimplicVM vm;
-    word *PC = &vm.mem[0], *SP = &vm.mem[2];
 
     // initialize vm
+    byte instr[SIZE];
+    word mem[SIZE];
+    word *PC = &mem[0], *SP = &mem[2];
     *PC = 0, *SP = 0xFFFF;
-    word count = 0;
-    while (scanf("%2hhx", &vm.instr[count++]) == 1);
 
-    // run vm with a halt condition & handle IO protocol
+    // load program from stdin
+    word count = 0;
+    while (scanf("%2hhx", &instr[count++]) == 1);
+
+    // run vm with a halt condition & IO protocol
     while (*PC != 0xFFFF) {
-        execute(&vm);
-        switch (vm.mem[3]) {
-            case 1:  printf("%c", vm.mem[4]); break;      // output to stdout
-            case 2:  scanf("%c", &vm.mem[4]); break;      // recieve character from stdin
+        execute(mem, instr);
+        switch (mem[3]) {
+            case 1:  printf("%c", mem[4]); break;      // output to stdout
+            case 2:  scanf("%c", &mem[4]); break;      // recieve character from stdin
         }
-        vm.mem[3] = 0;
+        mem[3] = 0;
+
     }
-    
     printf("internal state\n");
     printf("  PC\t%d\n", *PC);
-    printf("  SP\t%d\n", *SP);
-
     printf("stack\n");
     for (int i = 0; i < 0x10; i++) {
-        printf("  %x\t%d\n", i, vm.mem[*SP - i]);
+        printf("  %x\t%d\n", i, mem[*SP - i]);
     }
 }
 
