@@ -22,14 +22,14 @@ class SimplicIR:
         if isinstance(operand, str):  
             self.asm += self.slide(self.alloc[operand])
             return self.alloc[operand] % 16
-        # 2) operand is an absolute address (arguments or header)
+        # 2) operand is a header field of the next frame
         elif operand >= 0: 
-            self.asm += self.slide(operand)
-            return operand % 16
-        # 3) operand is a header field of the next frame
+            self.asm += self.slide(len(self.alloc) + operand)
+            return (len(self.alloc) + operand) % 16
+        # 3) operand is an negative (header value or absolute address)
         elif operand < 0: 
-            self.asm += self.slide(len(self.alloc) - operand)
-            return (len(self.alloc) - operand) % 16
+            self.asm += self.slide(-operand - 1)
+            return (-operand - 1) % 16
     
     # Compile entire IR code to ASM
     def compile(self) -> list[tuple[str]]:
