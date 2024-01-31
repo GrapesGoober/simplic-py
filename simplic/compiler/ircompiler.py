@@ -50,7 +50,8 @@ class SimplicIR:
                     self.asm += self.slide(0)
                     # this uses dynamic jumping to return, which requires a -1 offset
                     self.asm += ('load', 0), ('set', 0, 1), ('sub', 0), ('set', 0, 0), ('storem', 0)
-                    # alternative is to have a no-op in the middle or modify VM to not do *PC += 1
+                    # alternative is to have a buffer instruction in the middle (say, null instruction) 
+                    # or modify VM to not do *PC += 1
                 case 'loadm' | 'storem':
                     self.asm += ('load', self.take(tokens[2])), 
                     self.asm += (tokens[0], self.take(tokens[1])),
