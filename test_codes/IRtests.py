@@ -89,7 +89,7 @@ func_main = [
         ('move',    'result', 1),
 
         # halt the program
-        ('set', -1, 0xFFFF),
+        ('set', -1, 'halt'),
         ('return',),
     ]
 ]

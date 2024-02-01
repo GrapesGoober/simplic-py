@@ -15,7 +15,7 @@ class SimplicAsm:
     def __init__(self) -> None:
         self.asm = []
         self.bytecodes = []
-        self.labels = {}
+        self.labels = {'halt': 0xFFFE}
         self.PC = 0
         self.iter = 0
 
@@ -39,7 +39,7 @@ class SimplicAsm:
                         raise SimplicErr(f"Duplicate label '{label}'")
                     if label in OPCODES + CONDITIONS + STACK_OP:
                         raise SimplicErr(f"Cannot use reserved keyword as label")
-                    self.labels[label] = self.PC
+                    self.labels[label] = self.PC - 1
                 case 'if' | 'set':  self.PC += 3
                 case _:             self.PC += 1
 

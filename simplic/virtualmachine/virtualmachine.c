@@ -22,7 +22,7 @@ void execute(word *mem, byte *instr) {
     word slide = I4 ? 0xFFF0 : 0x10;
     bool Z = *A == 0, N = *A >> 15;
     bool cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
-    word jump = cond[I4] ? I16 - 1 : *PC + 2;
+    word jump = cond[I4] ? I16 : *PC + 2;
 
     // execute instruction
     switch (OP) {
