@@ -74,8 +74,8 @@ class SimplicAsm:
     # parses operands from tokens list
     def parse_operands(self, tokens: list[str], count: int):
         for _, tok in enumerate(self.get_operands(tokens, count)):
-            if tok in CONDITIONS:           yield CONDITIONS.index(tokens[1])
-            elif tok in STACK_OP:           yield STACK_OP.index(tokens[1])
+            if tok in CONDITIONS:           yield CONDITIONS.index(tok)
+            elif tok in STACK_OP:           yield STACK_OP.index(tok)
             elif tok in self.labels:        yield self.labels[tok]
             else:
                 if isinstance(tok, int):    yield tok
