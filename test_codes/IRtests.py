@@ -53,22 +53,27 @@ fibbonaci = [
     ]
 ]
 
-add_til_ten_recursive = [
+add_til_ten = [
     [
         "arg", "result", "ten", "step"
     ],
     [
-        ("set", "ten", 10),
-        ("set", "step", 1),
-        ("cmp", "arg", "ten"),
+        ("set",         "ten", 10),
+        ("cmp",         "arg", "ten"),
         ("if", "less", "recurse"),
-        ("return", "arg"),
+        ('move',         -2, 'arg'),                # simply return the argument
+        ("return",),
+
         ("label", "recurse"),
-        ("add", "result", "arg", "step"),
-        ("setargs", "result"),
-        ("call", "add_till_ten"),
-        ("setrets", "result"),
-        ("return", "result")
+        ("set",         "step", 1),
+        ("add",         "result", "arg", "step"),
+        ('set',         0, 'add_til_ten.return_0'), # assign return address
+        ('move',        1, 'result'),               # argument
+        ('call',        'add_til_ten'),             # call the function
+        ('label',       'return_0'),                # determine return address
+        ('move',        -2, 1),                     # return the result of the recursive call
+
+        ("return",)
     ]
 ]
 
@@ -77,19 +82,19 @@ func_main = [
         "result", "number"
     ],
     [
-        ('set', 'number', 12),
+        ('set', 'number', 3),
 
         # prepare call overhead (return address & function argument)
         ('set',     0, 'func_main.return_0'),  # assign return address
         ('move',    1, 'number'),    # argument
-        ('call',    'func_add_ten'), # call the function
+        ('call',    'add_til_ten'), # call the function
         ('label',   'return_0'),     # determine return address
 
         # recieve return value
         ('move',    'result', 1),
 
         # halt the program
-        ('set', -1, 'halt'),
+        ('set', -1, '#halt'),
         ('return',),
     ]
 ]
