@@ -1,11 +1,15 @@
 from simplic import SimplicIR, SimplicAsm, SimplicErr, error_print
 
 def compile() -> list[int]:
-    from test_codes.IRtests import func_main, func_add_ten, fibbonaci, add_til_ten
+    from test_codes.IRtests import func_main, add_til_ten, fib_iterative, fib_recursive
     
     ir = SimplicIR(func_main, 'func_main')
     asmcode = ir.compile()
     ir = SimplicIR(add_til_ten, 'add_til_ten')
+    asmcode += ir.compile()
+    ir = SimplicIR(fib_iterative, 'fib_iterative')
+    asmcode += ir.compile()
+    ir = SimplicIR(fib_recursive, 'fib_recursive')
     asmcode += ir.compile()
     
     # # handle error using
@@ -31,7 +35,7 @@ def run_vm(bytecodes: list[int]):
             break
         if output:
             # Process the output as needed
-            print(output.strip())
+            print(output, end='')
 
     # Wait for the process to finish
     process.wait()
