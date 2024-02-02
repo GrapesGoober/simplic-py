@@ -15,7 +15,7 @@ class SimplicAsm:
     def __init__(self) -> None:
         self.asm = []
         self.bytecodes = []
-        self.labels = {'halt': 0xFFFE}
+        self.labels = {'#halt': 0xFFFE}
         self.PC = 0
         self.iter = 0
 
