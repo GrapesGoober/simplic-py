@@ -21,7 +21,7 @@ void execute(word *mem, byte *instr) {
     // next, precomputes inputs for stack & if instructions
     word slide = I4 ? 0xFFF0 : 0x10;
     bool Z = *A == 0, N = *A >> 15;
-    bool cond[] = { 1, N, ~(Z | N), Z << 3, ~Z, (Z | N), ~N };
+    bool cond[] = { 1, N, !(Z | N), Z, !Z, (Z | N), !N };
     word jump = cond[I4] ? I16 : *PC + 2;
 
     // execute instruction
@@ -53,7 +53,7 @@ void main() {
     // initialize vm
     byte instr[SIZE];
     word mem[SIZE];
-    word *PC = &mem[0], *SP = &mem[2];
+    word *PC = &mem[0], *A = &mem[1], *SP = &mem[2];
     *PC = 0, *SP = 0xFFFF;
 
     // load program from stdin
@@ -68,6 +68,7 @@ void main() {
             case 2:  scanf("%c", &mem[4]); break;      // recieve character from stdin
         }
         mem[3] = 0;
+
 
     }
     printf("internal state\n");
