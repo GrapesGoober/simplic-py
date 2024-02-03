@@ -16,7 +16,6 @@ class SimplicAsm:
         self.asm = []
         self.bytecodes = []
         self.labels = {'#halt': 0xFFFE}
-        self.PC = 0
         self.iter = 0
 
     # load ASM from file
@@ -30,6 +29,7 @@ class SimplicAsm:
     # load ASM from list
     def from_list(self, asm: list) -> None:
         self.asm = asm
+        label_PC = 0
         for self.iter, tokens in enumerate(self.asm):
             if not tokens: continue
             match tokens[0]:
@@ -39,9 +39,9 @@ class SimplicAsm:
                         raise SimplicErr(f"Duplicate label '{label}'")
                     if label in OPCODES + CONDITIONS + STACK_OP:
                         raise SimplicErr(f"Cannot use reserved keyword as label")
-                    self.labels[label] = self.PC - 1
-                case 'if' | 'set':  self.PC += 3
-                case _:             self.PC += 1
+                    self.labels[label] = (label_PC - 1) & 0xFFFF
+                case 'if' | 'set':  label_PC += 3
+                case _:             label_PC += 1
 
     # compile current ASM to hex file
     def compile(self) -> list[int]:
