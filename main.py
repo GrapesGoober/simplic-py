@@ -17,9 +17,10 @@ def compile() -> list[int]:
     # [print(l) for l in asmcode]
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
     
-    asm = SimplicAsm()
-    asm.from_list(asmcode)
-    return asm.compile()
+    sa = SimplicAsm()
+    sa.from_list(asmcode)
+    bytecodes = sa.compile()
+    return bytecodes
     
 def run_vm(bytecodes: list[int]):
 
