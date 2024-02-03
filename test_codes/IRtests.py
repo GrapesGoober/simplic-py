@@ -9,13 +9,14 @@ func_main = [
         "result", "number"
     ],
     [
+        ('label', 'func_main'),
         ('set', 'number', 24),
 
         # prepare call overhead (return address & function argument)
         ('set',     0, 'func_main.return_0'), 
         ('move',    1, 'number'),
         ('call',    'fib_recursive'), 
-        ('label',   'return_0'),
+        ('label',   'func_main.return_0'),
 
         # recieve return value
         ('move',    'result', 1),
@@ -32,6 +33,7 @@ fib_iterative = [
         
     ],
     [
+        ('label', "fib_iterative"),
         ('label', 'start'),
         ('set',     'previous',     1),
         ('set',     'current',      1),
@@ -58,20 +60,21 @@ fib_recursive = [
         'n', 'result', '#i0', '#i1', '#i2', '#i3'
     ],
     [
+        ('label', "fib_recursive"),
         ('set',     '#i0', 1),
         ('cmp',     'n', '#i0'),
-        ('if', 'more', 'recurse'),
+        ('if', 'more', 'fib_recursive.recurse'),
         ('move',    -2, 'n'),
         ('return',),
 
-        ('label', 'recurse'),
+        ('label', 'fib_recursive.recurse'),
         # recursively call fib_recursive(n-1), set to #i2
         ('set',     '#i0', 1),
         ('sub',     '#i1', 'n', '#i0'),
         ('set',     0, 'fib_recursive.return_0'),  
         ('move',    1, '#i1'), 
         ('call',    'fib_recursive'), 
-        ('label',   'return_0'),
+        ('label',   'fib_recursive.return_0'),
         ('move',    '#i2', 1),
         # recursively call fib_recursive(n-2), set to #i3
         ('set',     '#i0', 2),
@@ -79,7 +82,7 @@ fib_recursive = [
         ('set',     0, 'fib_recursive.return_1'),  
         ('move',    1, '#i1'), 
         ('call',    'fib_recursive'), 
-        ('label',   'return_1'),
+        ('label',   'fib_recursive.return_1'),
         ('move',    '#i3', 1),
 
         ('add',     'result', '#i2', '#i3'),
@@ -94,19 +97,20 @@ add_til_ten = [
         "arg", "result", "ten", "step"
     ],
     [
+        ('label', "add_til_ten"),
         ("set",         "ten", 10),
         ("cmp",         "arg", "ten"),
-        ("if", "less", "recurse"),
+        ("if", "less", "add_til_ten.recurse"),
         ('move',         -2, 'arg'),                # simply return the argument
         ("return",),
 
-        ("label", "recurse"),
+        ("label", "add_til_ten.recurse"),
         ("set",         "step", 1),
         ("add",         "result", "arg", "step"),
         ('set',         0, 'add_til_ten.return_0'), # assign return address
         ('move',        1, 'result'),               # argument
         ('call',        'add_til_ten'),             # call the function
-        ('label',       'return_0'),                # determine return address
+        ('label',       'add_til_ten.return_0'),    # determine return address
         ('move',        -2, 1),                     # return the result of the recursive call
 
         ("return",)

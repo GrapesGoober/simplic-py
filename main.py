@@ -3,13 +3,13 @@ from simplic import SimplicIR, SimplicAsm, SimplicErr, error_print
 def compile() -> list[int]:
     from test_codes.IRtests import func_main, add_til_ten, fib_iterative, fib_recursive
     
-    ir = SimplicIR(func_main, 'func_main')
+    ir = SimplicIR(func_main[0], func_main[1])
     asmcode = ir.compile()
-    ir = SimplicIR(add_til_ten, 'add_til_ten')
+    ir = SimplicIR(add_til_ten[0], add_til_ten[1])
     asmcode += ir.compile()
-    ir = SimplicIR(fib_iterative, 'fib_iterative')
+    ir = SimplicIR(fib_iterative[0], fib_iterative[1])
     asmcode += ir.compile()
-    ir = SimplicIR(fib_recursive, 'fib_recursive')
+    ir = SimplicIR(fib_recursive[0], fib_recursive[1])
     asmcode += ir.compile()
     
     # # handle error using
