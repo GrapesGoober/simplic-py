@@ -1,4 +1,4 @@
-from simplic import SimplicIR, SimplicAsm, SimplicErr, error_print
+from simplic import SimplicIR, compile_asm, SimplicErr, error_print
 
 def compile() -> list[int]:
     from test_codes.IRtests import func_main, add_til_ten, fib_iterative, fib_recursive
@@ -17,9 +17,8 @@ def compile() -> list[int]:
     # [print(l) for l in asmcode]
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
     
-    asm = SimplicAsm()
-    asm.from_list(asmcode)
-    return asm.compile()
+    bytecodes = compile_asm(asmcode)
+    return bytecodes
     
 def run_vm(bytecodes: list[int]):
 
