@@ -82,4 +82,4 @@ class SimplicAsm:
             elif opr in STACK_OP:       yield STACK_OP.index(opr)
             elif opr in self.labels:    yield self.labels[opr]
             elif isinstance(opr, int):  yield opr
-            else: raise SimplicErr(f"Line {iter+1}: Invalid operand '{opr}'")
+            else: raise SimplicErr(f"Invalid operand '{opr}'")
