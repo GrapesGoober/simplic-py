@@ -1,0 +1,16 @@
+   
+    # potential syntax for HIR call
+    # ('call2', 'result', 'fib_recursive', 'number'),
+   
+    def compile_call(self, tokens: tuple) -> list[tuple[str]]:
+        for arg_i, var in enumerate(tokens[3:]):
+            self.asm += ('load', self.take(var)),
+            self.asm += ('store', self.take(arg_i + 1)),
+
+        dest, func = tokens[1:3]
+        label = f'someunique.{self.return_count}'
+        self.asm += ('set', self.take(0), label),
+        self.asm += ('if', 'always', func), ('label', label),
+        if dest != None:
+            self.asm += ('load', self.take(1)), 
+            self.asm += ('store', self.take(dest)),

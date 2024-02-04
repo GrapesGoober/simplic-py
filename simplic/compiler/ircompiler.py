@@ -40,6 +40,10 @@ class SimplicIR:
                     self.asm += ('store', self.take(tokens[1])),
         return self.asm
 
+    # TODO: implement a "instr" function? where it slides the variables and append to asm for us
+    # the idea is to reduce the clutter of "self.asm += " and the trailing colon "," readability problem
+
+    # TODO: merge the slide function with take function, into a "slide_and_alloc"
     # Slide current window to the target variable location
     def slide(self, location: str) -> list[tuple[str]]:
         delta = location // 16 - self.current_window
