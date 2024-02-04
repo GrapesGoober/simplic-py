@@ -39,8 +39,8 @@ class SimplicIR:
     # resolve variable addresses and write assembly codes to self.asm
     def to_asm(self, *codes: tuple[str|int]):
         for code in codes:
-            if len(code) == 2:      opcode, operand, = code
-            elif len(code) == 3:    opcode, operand, _ = code
+            if len(code) == 2:      opcode, operand = code
+            elif len(code) == 3:    opcode, operand, imm = code
 
             # handle 3 separate operand cases
             if isinstance(operand, str):    
@@ -59,4 +59,4 @@ class SimplicIR:
 
             # append to assembly code
             if len(code) == 2:      self.asm += (opcode, location % 16),
-            elif len(code) == 3:    self.asm += (opcode, location % 16, code[2]),
+            elif len(code) == 3:    self.asm += (opcode, location % 16, imm),
