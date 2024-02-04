@@ -1,5 +1,4 @@
 # TODO: Check for valid opcodes
-# TODO: Handle "NOT" unary instruction
 ARITHMATIC_OPCODES = [
     "add", "sub", "lsl", "lsr", "mul", "div", "and", "or", "not"
 ]
@@ -24,44 +23,40 @@ class SimplicIR:
                 case 'if':
                     self.asm += ('if', tokens[1], tokens[2]),
                 case 'loadm' | 'storem':
-                    self.to_asm('load', tokens[2])
-                    self.to_asm(tokens[0], tokens[1])
+                    self.to_asm(('load', tokens[2]), (tokens[0], tokens[1]))
                 case 'set':     
-                    self.to_asm('set', tokens[1], tokens[2])
+                    self.to_asm(('set', tokens[1], tokens[2]))
                 case 'move': 
-                    # self.to_asm(('load', tokens[2]), ('store', tokens[1]))
-                    self.to_asm('load', tokens[2])
-                    self.to_asm('store', tokens[1])
+                    self.to_asm(('load', tokens[2]), ('store', tokens[1]))
                 case 'cmp':
-                    self.to_asm('load', tokens[1])
-                    self.to_asm('sub', tokens[2])
+                    self.to_asm(('load', tokens[1]), ('sub', tokens[2]))
                 case _:
                     if tokens[2] != None: # in case of unary op, ignore operand
-                        self.to_asm('load', tokens[2])
-                    self.to_asm(tokens[0], tokens[3])
-                    self.to_asm('store', tokens[1])
-        
-                    # self.to_asm((tokens[0], tokens[3]), ('store', tokens[1]))
+                        self.to_asm(('load', tokens[2]))
+                    self.to_asm((tokens[0], tokens[3]), ('store', tokens[1]))
         return self.asm
 
-    # resolve variable address and write assembly code to self.asm
-    def to_asm(self, opcode: str, operand: str|int, imm: str|int = None):
+    # resolve variable addresses and write assembly codes to self.asm
+    def to_asm(self, *codes: tuple[str|int]):
+        for code in codes:
+            if len(code) == 2:      opcode, operand, = code
+            elif len(code) == 3:    opcode, operand, _ = code
 
-        # handle 3 separate operand cases
-        if isinstance(operand, str):  
-            location = self.alloc[operand]
-        elif operand < 0: 
-            location = (-operand - 1)
-        elif operand >= 0: 
-            fresh_window = len(self.alloc) // 16 + 1
-            location = fresh_window * 16 + operand
-        
-        # slide window to target location
-        delta = location // 16 - self.current_window
-        self.current_window += delta
-        if   delta < 0: self.asm += [('stack', 'pop')] * -delta
-        elif delta > 0: self.asm += [('stack', 'push')] * delta
+            # handle 3 separate operand cases
+            if isinstance(operand, str):    
+                location = self.alloc[operand]
+            elif operand < 0:               
+                location = -operand - 1
+            elif operand >= 0: 
+                fresh_window = len(self.alloc) // 16 + 1
+                location = fresh_window * 16 + operand
+            
+            # slide window to target location
+            delta = location // 16 - self.current_window
+            self.current_window += delta
+            if   delta < 0: self.asm += [('stack', 'pop')] * -delta
+            elif delta > 0: self.asm += [('stack', 'push')] * delta
 
-        # append to assembly code
-        if imm == None: self.asm += (opcode, location % 16),
-        else: self.asm += (opcode, location % 16, imm),
+            # append to assembly code
+            if len(code) == 2:      self.asm += (opcode, location % 16),
+            elif len(code) == 3:    self.asm += (opcode, location % 16, code[2]),
