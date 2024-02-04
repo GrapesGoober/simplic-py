@@ -1,5 +1,4 @@
-   
-    # potential syntax for HIR call
+# potential syntax for HIR call
     # ('call2', 'result', 'fib_recursive', 'number'),
 
     case 'call_new':
@@ -9,3 +8,19 @@
         self.to_asm(('set', 0, label))
         self.asm += ('if', 'always', tokens[2]), ('label', label)
         if tokens[1] != None: self.to_asm(('load', 1), ('store', tokens[1]))
+
+# HIR style code for recursive fib
+    func fib_recursive(n)
+        label start
+            #i0 = 1
+            if n > #i0 recurse
+            return n
+        label recurse
+            #i0 = 1
+            #i1 = n - #i0
+            #i2 = call fib_recursive(#i1)
+            #i0 = 2
+            #i1 = n - #i0
+            #i3 = call fib_recursive(#i1)
+            result = #i2 + #i3
+            return result
