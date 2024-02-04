@@ -45,29 +45,23 @@ class SimplicIR:
         return self.asm
 
     # resolve variable address and write assembly code to self.asm
-    def to_asm(self, op: str, var: str|int, imm: str|int = None):
+    def to_asm(self, opcode: str, operand: str|int, imm: str|int = None):
 
         # handle 3 separate operand cases
-        var_address = 0
-        if isinstance(var, str):  
-            self.asm += self.slide(self.alloc[var])
-            var_address = self.alloc[var] % 16
-        elif var >= 0: 
+        if isinstance(operand, str):  
+            location = self.alloc[operand]
+        elif operand < 0: 
+            location = (-operand - 1)
+        elif operand >= 0: 
             fresh_window = len(self.alloc) // 16 + 1
-            self.asm += self.slide(fresh_window * 16 + var)
-            var_address = var % 16
-        elif var < 0: 
-            self.asm += self.slide(-var - 1)
-            var_address = (-var - 1) % 16
+            location = fresh_window * 16 + operand
         
-        # in case immediate value is not specified
-        if imm == None: self.asm += (op, var_address),
-        else: self.asm += (op, var_address, imm),
-
-    # Slide current window to the target variable location
-    def slide(self, location: str) -> list[tuple[str]]:
+        # slide window to target location
         delta = location // 16 - self.current_window
         self.current_window += delta
-        if   delta < 0: return [('stack', 'pop')] * -delta
-        elif delta > 0: return [('stack', 'push')] * delta
-        else:           return []
+        if   delta < 0: self.asm += [('stack', 'pop')] * -delta
+        elif delta > 0: self.asm += [('stack', 'push')] * delta
+
+        # append to assembly code
+        if imm == None: self.asm += (opcode, location % 16),
+        else: self.asm += (opcode, location % 16, imm),
