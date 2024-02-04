@@ -24,26 +24,46 @@ class SimplicIR:
                 case 'if':
                     self.asm += ('if', tokens[1], tokens[2]),
                 case 'loadm' | 'storem':
-                    self.asm += ('load', self.take(tokens[2])),
-                    self.asm += (tokens[0], self.take(tokens[1])),
+                    self.to_asm('load', tokens[2])
+                    self.to_asm(tokens[0], tokens[1])
                 case 'set':     
-                    self.asm += ('set', self.take(tokens[1]), tokens[2]),
-                case 'move':
-                    self.asm += ('load', self.take(tokens[2])),
-                    self.asm += ('store', self.take(tokens[1])),
+                    self.to_asm('set', tokens[1], tokens[2])
+                case 'move': 
+                    # self.to_asm(('load', tokens[2]), ('store', tokens[1]))
+                    self.to_asm('load', tokens[2])
+                    self.to_asm('store', tokens[1])
                 case 'cmp':
-                    self.asm += ('load', self.take(tokens[1])),
-                    self.asm += ('sub', self.take(tokens[2])),
+                    self.to_asm('load', tokens[1])
+                    self.to_asm('sub', tokens[2])
                 case _:
-                    self.asm += ('load', self.take(tokens[2])),
-                    self.asm += (tokens[0], self.take(tokens[3])),
-                    self.asm += ('store', self.take(tokens[1])),
+                    if tokens[2] != None: # in case of unary op, ignore operand
+                        self.to_asm('load', tokens[2])
+                    self.to_asm(tokens[0], tokens[3])
+                    self.to_asm('store', tokens[1])
+        
+                    # self.to_asm((tokens[0], tokens[3]), ('store', tokens[1]))
         return self.asm
 
-    # TODO: implement a "instr" function? where it slides the variables and append to asm for us
-    # the idea is to reduce the clutter of "self.asm += " and the trailing colon "," readability problem
+    # resolve variable address and write assembly code to self.asm
+    def to_asm(self, op: str, var: str|int, imm: str|int = None):
 
-    # TODO: merge the slide function with take function, into a "slide_and_alloc"
+        # handle 3 separate operand cases
+        var_address = 0
+        if isinstance(var, str):  
+            self.asm += self.slide(self.alloc[var])
+            var_address = self.alloc[var] % 16
+        elif var >= 0: 
+            fresh_window = len(self.alloc) // 16 + 1
+            self.asm += self.slide(fresh_window * 16 + var)
+            var_address = var % 16
+        elif var < 0: 
+            self.asm += self.slide(-var - 1)
+            var_address = (-var - 1) % 16
+        
+        # in case immediate value is not specified
+        if imm == None: self.asm += (op, var_address),
+        else: self.asm += (op, var_address, imm),
+
     # Slide current window to the target variable location
     def slide(self, location: str) -> list[tuple[str]]:
         delta = location // 16 - self.current_window
@@ -51,16 +71,3 @@ class SimplicIR:
         if   delta < 0: return [('stack', 'pop')] * -delta
         elif delta > 0: return [('stack', 'push')] * delta
         else:           return []
-    
-    # Slide window and returns the allocation for variables or frame headers
-    def take(self, operand: int | str) -> int:
-        if isinstance(operand, str):  
-            self.asm += self.slide(self.alloc[operand])
-            return self.alloc[operand] % 16
-        elif operand >= 0: 
-            fresh_window = len(self.alloc) // 16 + 1
-            self.asm += self.slide(fresh_window * 16 + operand)
-            return operand % 16
-        elif operand < 0: 
-            self.asm += self.slide(-operand - 1)
-            return (-operand - 1) % 16
