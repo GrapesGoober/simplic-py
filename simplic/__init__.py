@@ -1,3 +1,4 @@
 from simplic.compiler.assembler import SimplicAsm 
 from simplic.compiler.exceptions import SimplicErr, error_print 
 from simplic.compiler.ircompiler import SimplicIR
+from simplic.compiler.irparser import SimplicIRParser

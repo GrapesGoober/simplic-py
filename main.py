@@ -1,16 +1,19 @@
-from simplic import SimplicIR, SimplicAsm, SimplicErr, error_print
+from simplic import SimplicIR, SimplicAsm, SimplicIRParser, SimplicErr, error_print
 
 def compile() -> list[int]:
     from test_codes.IRtests import func_main, add_til_ten, fib_iterative, fib_recursive
     
-    ir = SimplicIR(func_main[0], func_main[1])
-    asmcode = ir.compile()
-    ir = SimplicIR(add_til_ten[0], add_til_ten[1])
-    asmcode += ir.compile()
-    ir = SimplicIR(fib_iterative[0], fib_iterative[1])
-    asmcode += ir.compile()
-    ir = SimplicIR(fib_recursive[0], fib_recursive[1])
-    asmcode += ir.compile()
+    asmcode = [
+        ('if', 'always', r'%halt')
+    ]
+    # ir = SimplicIR(func_main[0], func_main[1])
+    # asmcode += ir.compile()
+    # ir = SimplicIR(add_til_ten[0], add_til_ten[1])
+    # asmcode += ir.compile()
+    # ir = SimplicIR(fib_iterative[0], fib_iterative[1])
+    # asmcode += ir.compile()
+    # ir = SimplicIR(fib_recursive[0], fib_recursive[1])
+    # asmcode += ir.compile()
     
     # # handle error using
     # # error_print(asmfile, asm.iter, e.message)
@@ -23,6 +26,8 @@ def compile() -> list[int]:
     return bytecodes
     
 def run_vm(bytecodes: list[int]):
+
+    SimplicIRParser().from_file("test_codes\\fib.ir")
 
     import subprocess
     exe_path = "simplic\\virtualmachine\\virtualmachine.exe"
