@@ -22,7 +22,7 @@ func_main = [
         ('move',    'result', 1),
 
         # halt the program
-        ('set', -1, '#halt'),
+        ('set', -1, '%halt'),
         ('return',),
     ]
 ]
@@ -57,35 +57,35 @@ fib_iterative = [
 
 fib_recursive = [
     [
-        'n', 'result', '#i0', '#i1', '#i2', '#i3'
+        'n', 'result', r'%i0', r'%i1', r'%i2', r'%i3'
     ],
     [
         ('label', "fib_recursive"),
-        ('set',     '#i0', 1),
-        ('cmp',     'n', '#i0'),
+        ('set',     r'%i0', 1),
+        ('cmp',     'n', r'%i0'),
         ('if', 'more', 'fib_recursive.recurse'),
         ('move',    -2, 'n'),
         ('return',),
 
         ('label', 'fib_recursive.recurse'),
         # recursively call fib_recursive(n-1), set to #i2
-        ('set',     '#i0', 1),
-        ('sub',     '#i1', 'n', '#i0'),
+        ('set',     r'%i0', 1),
+        ('sub',     r'%i1', 'n', r'%i0'),
         ('set',     0, 'fib_recursive.return_0'),  
-        ('move',    1, '#i1'), 
+        ('move',    1, r'%i1'), 
         ('call',    'fib_recursive'), 
         ('label',   'fib_recursive.return_0'),
-        ('move',    '#i2', 1),
+        ('move',    r'%i2', 1),
         # recursively call fib_recursive(n-2), set to #i3
-        ('set',     '#i0', 2),
-        ('sub',     '#i1', 'n', '#i0'),
+        ('set',     r'%i0', 2),
+        ('sub',     r'%i1', 'n', r'%i0'),
         ('set',     0, 'fib_recursive.return_1'),  
-        ('move',    1, '#i1'), 
+        ('move',    1, r'%i1'), 
         ('call',    'fib_recursive'), 
         ('label',   'fib_recursive.return_1'),
-        ('move',    '#i3', 1),
+        ('move',    r'%i3', 1),
 
-        ('add',     'result', '#i2', '#i3'),
+        ('add',     'result', r'%i2', r'%i3'),
         ('move',    -2, 'result'),
         ('return',)
     ]

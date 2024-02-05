@@ -13,7 +13,7 @@ CONDITIONS = [
 STACK_OP = ['pop', 'push']
 
 class SimplicAsm:
-    asmcodes, labels = [], {'#halt': 0xFFFE}
+    asmcodes, labels = [], {r'%halt': 0xFFFE}
 
     # loads assembly codes from tokens list and assign label addresses
     def from_list(self, asmcodes: list[tuple]) -> None:
