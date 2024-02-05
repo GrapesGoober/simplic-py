@@ -28,12 +28,10 @@ class SimplicIR:
                     self.to_asm(('set', tokens[1], tokens[2]))
                 case 'move': 
                     self.to_asm(('load', tokens[2]), ('store', tokens[1]))
-                case 'cmp':
-                    self.to_asm(('load', tokens[1]), ('sub', tokens[2]))
                 case _:
-                    if tokens[2] != None: # in case of unary op, ignore operand
-                        self.to_asm(('load', tokens[2]))
-                    self.to_asm((tokens[0], tokens[3]), ('store', tokens[1]))
+                    if tokens[2] != None: self.to_asm(('load', tokens[2]))
+                    self.to_asm((tokens[0], tokens[3]))
+                    if tokens[1] != None: self.to_asm(('store', tokens[1]))
         return self.asm
 
     # resolve variable addresses and write assembly codes to self.asm
