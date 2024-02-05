@@ -36,7 +36,7 @@ class SimplicAsm:
         with open(filename, 'r') as f: 
             for line in f:
                 tokens = []
-                for tok in line.strip().split('#')[0].split():
+                for tok in line.split('#')[0].split():
                     if tok.startswith("0x"):    tokens += int(tok, 16),
                     elif tok.startswith("0b"):  tokens += int(tok, 2),
                     elif tok.isdigit():         tokens += int(tok, 10),
