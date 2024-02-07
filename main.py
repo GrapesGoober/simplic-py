@@ -19,15 +19,16 @@ def compile() -> list[int]:
     # # error_print(asmfile, asm.iter, e.message)
     # [print(l) for l in asmcode]
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
-    
-    sa = SimplicAsm()
-    with open("test_codes\\fib2.asm") as f:
-        sa.scan_label(f)
 
     sa = SimplicAsm()
-    sa.from_list(asmcode)
-    bytecodes = sa.old_compile()
-    return bytecodes
+    with open("test_codes\\fib2.asm") as f:
+        for i in sa.compile(f):
+            print(i)
+
+    # sa = SimplicAsm()
+    # sa.from_list(asmcode)
+    # bytecodes = sa.old_compile()
+    # return bytecodes
     
 def run_vm(bytecodes: list[int]):
 

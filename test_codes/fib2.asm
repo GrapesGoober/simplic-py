@@ -35,3 +35,4 @@ fibbonaci.loop:
     load    3
     stack   pop
     store   14
+    if      always,     %halt
