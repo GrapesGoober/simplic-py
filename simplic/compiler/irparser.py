@@ -54,22 +54,3 @@ def tokenize_ir(ir_string):
                 tokens.append((name, value))
 
     return tokens
-
-# experiment with ASM parser using regex
-def asm_parser():
-    
-    with open('test_codes\\fib2.asm') as f:
-        # Define the regular expression patterns
-        label = r'(?P<LABEL>[\w.%]*)\s*:'
-        instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)(?:\s*,\s*(?P<IMMEDIATE>\w+))?'
-        pattern = rf'\s*(({label})|({instr}))'
-
-        for iter, line in enumerate(f):
-            re_match = re.match(pattern, line)
-
-            if re_match: print(re_match.groupdict())
-            else:
-                print('Invalid syntax')
-                return
-
-asm_parser()
