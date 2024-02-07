@@ -19,15 +19,19 @@ def compile() -> list[int]:
     # # error_print(asmfile, asm.iter, e.message)
     # [print(l) for l in asmcode]
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
-    
+
     sa = SimplicAsm()
-    sa.from_list(asmcode)
-    bytecodes = sa.compile()
-    return bytecodes
+    with open("test_codes\\recursivefib.asm") as f:
+        run_vm(sa.compile(f))
+
+    # sa = SimplicAsm()
+    # sa.from_list(asmcode)
+    # bytecodes = sa.old_compile()
+    # return bytecodes
     
 def run_vm(bytecodes: list[int]):
 
-    SimplicIRParser().from_file("test_codes\\fib.ir")
+    # SimplicIRParser().from_file("test_codes\\fib.ir")
 
     import subprocess
     exe_path = "simplic\\virtualmachine\\virtualmachine.exe"
@@ -48,6 +52,6 @@ def run_vm(bytecodes: list[int]):
     
 if __name__ == '__main__':
     bytecodes = compile()
-    run_vm(bytecodes)
+    # run_vm(bytecodes)
     
 
