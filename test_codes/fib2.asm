@@ -1,5 +1,5 @@
 fibbonaci.start:
-    set     1,       
+    set     1,       2
     set     2,       1
     set     3,       0
     set     4,       2
@@ -26,7 +26,7 @@ fibbonaci.loop:
     stack   pop
     load    4
     sub     6
-    if      lesseq,    fibbonaci.loop
+    if      eqless,    fibbonaci.loop
     stack   push
     load    2
     stack   pop
