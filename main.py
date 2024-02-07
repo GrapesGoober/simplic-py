@@ -22,7 +22,7 @@ def compile() -> list[int]:
 
     sa = SimplicAsm()
     with open("test_codes\\recursivefib.asm") as f:
-        run_vm(sa.compile(list(f)))
+        run_vm(sa.compile(f))
 
     # sa = SimplicAsm()
     # sa.from_list(asmcode)
