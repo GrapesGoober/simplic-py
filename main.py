@@ -21,13 +21,17 @@ def compile() -> list[int]:
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
     
     sa = SimplicAsm()
+    with open("test_codes\\fib2.asm") as f:
+        sa.scan_label(f)
+
+    sa = SimplicAsm()
     sa.from_list(asmcode)
-    bytecodes = sa.compile()
+    bytecodes = sa.old_compile()
     return bytecodes
     
 def run_vm(bytecodes: list[int]):
 
-    SimplicIRParser().from_file("test_codes\\fib.ir")
+    # SimplicIRParser().from_file("test_codes\\fib.ir")
 
     import subprocess
     exe_path = "simplic\\virtualmachine\\virtualmachine.exe"
@@ -48,6 +52,6 @@ def run_vm(bytecodes: list[int]):
     
 if __name__ == '__main__':
     bytecodes = compile()
-    run_vm(bytecodes)
+    # run_vm(bytecodes)
     
 

@@ -5,6 +5,7 @@ fibbonaci.start:
     set     4,       2
     set     5,       1
     set     6,       24
+    
 fibbonaci.loop:
     load    1
     add     2
