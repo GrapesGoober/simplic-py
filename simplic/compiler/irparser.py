@@ -55,28 +55,22 @@ def tokenize_ir(ir_string):
 
     return tokens
 
-print(operation)
-
-
 # experiment with ASM parser using regex
 def asm_parser():
-    # Define the regular expression patterns
-    patterns = [
-        (r'\b(label|set|load|add|store|stack|if)\b', 'OPCODE'),
-        (r'\b\d+\b', 'LITERAL'),
-        (r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', 'KEYWORD'),
-    ]
+    
+    with open('test_codes\\fib2.asm') as f:
+        # Define the regular expression patterns
+        label = r'(?P<LABEL>[\w.%]*)\s*:'
+        instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)(?:\s*,\s*(?P<IMMEDIATE>\w+))?'
+        pattern = f'({label})|({instr})'
 
-    # Combine patterns into a single regular expression
-    combined_pattern = '|'.join('(?:%s)' % pattern for pattern, _ in patterns)
+        for iter, line in enumerate(f):
+            re_match = re.match(pattern, line)
 
-    # Tokenize the assembly code
-    tokens = []
-    for match in re.finditer(combined_pattern, assembly_code):
-        for name, value in match.groupdict().items():
-            if value is not None:
-                tokens.append((name, value))
 
-    # Display the tokens
-    for token in tokens:
-        print(token)
+            if re_match: print(re_match.groupdict())
+            else:
+                print('Invalid syntax')
+                return
+
+asm_parser()
