@@ -21,9 +21,8 @@ def compile() -> list[int]:
     # [print(f"{b:02x}", end=' ') for b in bytecodes]
 
     sa = SimplicAsm()
-    with open("test_codes\\fib2.asm") as f:
-        for i in sa.compile(f):
-            print(i)
+    with open("test_codes\\recursivefib.asm") as f:
+        run_vm(sa.compile(list(f)))
 
     # sa = SimplicAsm()
     # sa.from_list(asmcode)

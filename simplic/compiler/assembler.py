@@ -16,9 +16,7 @@ STACK_OP = ['pop', 'push']
 class SimplicAsm:
     labels, iter, label_PC = {r'%halt': 0xFFFE}, 0, 0
 
-    def compile(self, asmcodes: Iterator[str]) -> Iterator[int]:
-        asmcodes = list(asmcodes)
-
+    def compile(self, asmcodes: list[str]) -> Iterator[int]:
         # count the PC address to build label table
         for self.iter, line in enumerate(asmcodes):
             line = line.split("#")[0]
@@ -36,14 +34,14 @@ class SimplicAsm:
 
     # iterates over each asm line and construct labels dict
     def build_label_table(self, tokens: dict[str, str]):
-        label = tokens['LABEL']
+        label, opcode = tokens['LABEL'], tokens['OPCODE']
         if label != None:
             if label in self.labels:  
                 raise SimplicErr(f"Duplicate label '{label}'")
             if label in OPCODES + CONDITIONS + STACK_OP:
                 raise SimplicErr(f"Cannot use reserved keyword as label")
             self.labels[label] = (self.label_PC - 1) & 0xFFFF
-        elif label in ('if', 'set'): 
+        elif opcode in ('if', 'set'): 
             self.label_PC += 3
         else: self.label_PC += 1
 
