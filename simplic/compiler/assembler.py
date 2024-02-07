@@ -21,7 +21,7 @@ class SimplicAsm:
         # Define the regular expression patterns
         label = r'(?P<LABEL>[\w.%]*)\s*:'
         instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)'
-        imm16 = r'(?:\s*,\s*(?P<IMMEDIATE>[\w.%]++))?'
+        imm16 = r'(?:\s*,\s*(?P<IMMEDIATE>[\w.%]+))?'
         pattern = rf'\s*(({label})|({instr}{imm16}))'
 
         for self.iter, line in enumerate(asmcodes):
