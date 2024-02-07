@@ -62,11 +62,10 @@ def asm_parser():
         # Define the regular expression patterns
         label = r'(?P<LABEL>[\w.%]*)\s*:'
         instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)(?:\s*,\s*(?P<IMMEDIATE>\w+))?'
-        pattern = f'({label})|({instr})'
+        pattern = rf'\s*(({label})|({instr}))'
 
         for iter, line in enumerate(f):
             re_match = re.match(pattern, line)
-
 
             if re_match: print(re_match.groupdict())
             else:
