@@ -20,8 +20,9 @@ class SimplicAsm:
     def tokenize(self, asmcodes: list[str]) -> Iterator[dict]:
         # Define the regular expression patterns
         label = r'(?P<LABEL>[\w.%]*)\s*:'
-        instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)(?:\s*,\s*(?P<IMMEDIATE>[\w.%]++))?'
-        pattern = rf'\s*(({label})|({instr}))'
+        instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)'
+        imm16 = r'(?:\s*,\s*(?P<IMMEDIATE>[\w.%]++))?'
+        pattern = rf'\s*(({label})|({instr}{imm16}))'
 
         for self.iter, line in enumerate(asmcodes):
             line = line.split("#")[0].lower()
@@ -45,7 +46,7 @@ class SimplicAsm:
             yield from self.compile_instr(tokens)
 
     # scan the code to construct the label table
-    def build_label_table(self, tokens: dict[str, str]):
+    def build_label_table(self, tokens: dict[str, str]) -> None:
         label, opcode = tokens['LABEL'], tokens['OPCODE']
         if label != None:
             if label in self.labels:  
@@ -87,10 +88,4 @@ class SimplicAsm:
         elif tok.startswith("0b"):  return int(tok, 2)   & 0xFFFF
         elif tok.isdigit():         return int(tok, 10)  & 0xFFFF
         else:                       raise SimplicErr(f"Invalid operand '{tok}'")
-        
-    # compiles to bytecodes and writes to hexfile
-    def compile_to_hexfile(self, filename: str) -> None:
-        with open(filename, 'w') as f:
-            for i, b in enumerate(self.old_compile()):
-                newline = '\n' if ((i + 1) % 16 == 0) else ''
-                f.write(f'{b:02x} {newline}')
+
