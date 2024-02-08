@@ -2,24 +2,9 @@ class SimplicIRParser:
     def from_file(self, filename: str) -> list[tuple]:
         with open(filename, 'r') as file:
             for linenum, line in enumerate(file):
-                tokens = line.split('#')[0].split()
-                if tokens == []: continue
-
-                match tokens[0]:
-                    case 'func':
-                        print('\nDefining a new function')
-                        print('Name:', tokens[1])
-                    case 'label':
-                        print('label', tokens[1])
-                    case _:
-                        dest = None
-                        if '=' in tokens: dest = tokens[0]
-
-                        print('\t', ' '.join(tokens))
-                        psuedo_ir_instruction('add', 'result', 'x', 'y')
-
-
-# SimplicIRParser().from_file("test_codes\\fib.ir")
+                line = line.split("#")[0].lower()
+                if line.strip() == "": continue
+                tokens = tokenize_ir(line)
 
 def psuedo_ir_instruction(operator, dest, operand1, operand2):
     if operand1 != None:    print(f'load from {operand1}')
@@ -29,28 +14,43 @@ def psuedo_ir_instruction(operator, dest, operand1, operand2):
 
 import re
 
-word = r'(\w|%|\$|.)+'
-destination = rf'{word}\s*=\s*'
-operators = r'\+|-|\*|\/|<<|>>|&|\||~|cmp'
-operation = rf'\s*({operators})\s*{word}'
+# Define regular expression patterns for different components
+
+# function is a func-keyword then funcname followed by optional arguments
+func =  r'func\s+(?P<FUNC>[\w.%]+)'
+args =  r'\((?P<ARGS>(\s*[\w.%]+\s*,?\s*)*)\)'
+funcdef = rf"{func}\s*({args})?\s*"
+
+# label is a label name with colon
+label = r'(?P<LABEL>[\w.%]+)\s*:'
+
+# TODO: define return
+
+# parsing operation is finicky
+dest =  r'(?P<DEST>[\w.%]+)\s*=\s*'
+op =    r'\s*(?P<OP>\+|-|\*|\/|<<|>>|&|\||~)\s*'
+var1 =  r'\s*(?P<VAR1>[\w.%]+)\s*'
+var2 =  r'\s*(?P<VAR2>[\w.%]+)\s*'
+operation = rf"({var1})?({op}{var2})?"
+
+instr = rf'({dest})?({operation})'
+
+pattern = f"\s*(({funcdef})|({label})|({instr}))"
+
+# syntax idea: 
+# an IF statement is defined as
+# if <cond>, label
+# then cond can be defined as
+# either    <var> <compare> <var>    or  <var>
+
+print(funcdef)
 
 def tokenize_ir(ir_string):
-    # Define regular expression patterns for different components
-    patterns = [
-        (r'(?P<destination>[a-zA-Z_][a-zA-Z0-9_]*)?\s*=\s*', 'DESTINATION'),
-        (r'(?P<variable1>[a-zA-Z_][a-zA-Z0-9_]*)', 'VARIABLE1'),
-        (r'\s*(?P<operator>[+\-*/<<>>&|!cmp]*)\s*', 'OPERATOR'),
-        (r'(?P<variable2>[a-zA-Z_][a-zA-Z0-9_]*)?', 'VARIABLE2'),
-    ]
-
-    # Combine patterns into a single regular expression
-    combined_pattern = '|'.join('(?:%s)' % pattern for pattern, _ in patterns)
 
     # Tokenize the IR string
-    tokens = []
-    for match in re.finditer(combined_pattern, ir_string):
-        for name, value in match.groupdict().items():
-            if value is not None:
-                tokens.append((name, value))
+    print(ir_string, end='')
+    match = re.match(pattern, ir_string)
+    if match == None: print('cant parse')
+    else: print('\t\t', match.groupdict())
 
-    return tokens
+SimplicIRParser().from_file("test_codes\\fib.ir")

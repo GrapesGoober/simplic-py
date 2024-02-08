@@ -1,28 +1,28 @@
 func main
-    label start
+    start:
         number = 24
         result = call fib_recursive(number)
         return
 
-func fib_recursive n
-    label start
+func fib_recursive(n)
+    start:
         %i0 = 1
         if n > %i0 recurse
         return n
-    label recurse
+    recurse:
         %i0 = 1
         %i1 = n - %i0
-        %i2 = call fib_recursive %i1
+        %i2 = call fib_recursive(%i1)
         %i0 = 2
         %i1 = n - %i0
-        %i3 = call fib_recursive %i1
+        %i3 = call fib_recursive(%i1)
         result = %i2 + %i3
         return result
 
-func test_arg_parser a b c
+func test_arg_parser(a, b, c)
         ans = a + b
         ans = ans - c
         return ans
-    label impossible
+    impossible:
         ans = 123
         return ans
