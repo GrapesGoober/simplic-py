@@ -19,7 +19,7 @@ class SimplicAsm:
     # Iterator function to tokenize each line of asm using regex
     def tokenize(self, asmcodes: list[str]) -> Iterator[dict]:
         # Define the regular expression patterns
-        label = r'(?P<LABEL>[\w.%]*)\s*:'
+        label = r'(?P<LABEL>[\w.%]+)\s*:'
         instr = r'(?P<OPCODE>\w+)\s+(?P<OPERAND>\w+)'
         imm16 = r'(?:\s*,\s*(?P<IMMEDIATE>[\w.%]+))?'
         pattern = rf'\s*(({label})|({instr}{imm16}))'
