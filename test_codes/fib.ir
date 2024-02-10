@@ -2,7 +2,7 @@ func main
     start:
         number = 24
         result = call fib_recursive(number)
-        return
+        return 0
 
 func fib_recursive(n)
     start:

@@ -4,7 +4,7 @@ class SimplicIRParser:
             for linenum, line in enumerate(file):
                 line = line.split("#")[0].lower()
                 if line.strip() == "": continue
-                tokens = tokenize_ir(line)
+                print(list(tokenize_ir(line)))
 
 def psuedo_ir_instruction(operator, dest, operand1, operand2):
     if operand1 != None:    print(f'load from {operand1}')
@@ -14,43 +14,52 @@ def psuedo_ir_instruction(operator, dest, operand1, operand2):
 
 import re
 
-# Define regular expression patterns for different components
-
-# function is a func-keyword then funcname followed by optional arguments
-func =  r'func\s+(?P<FUNC>[\w.%]+)'
-args =  r'\((?P<ARGS>(\s*[\w.%]+\s*,?\s*)*)\)'
-funcdef = rf"{func}\s*({args})?\s*"
-
-# label is a label name with colon
-label = r'(?P<LABEL>[\w.%]+)\s*:'
-
-# TODO: define return
-
-# parsing operation is finicky
-dest =  r'(?P<DEST>[\w.%]+)\s*=\s*'
-op =    r'\s*(?P<OP>\+|-|\*|\/|<<|>>|&|\||~)\s*'
-var1 =  r'\s*(?P<VAR1>[\w.%]+)\s*'
-var2 =  r'\s*(?P<VAR2>[\w.%]+)\s*'
-operation = rf"({var1})?({op}{var2})?"
-
-instr = rf'({dest})?({operation})'
-
-pattern = f"\s*(({funcdef})|({label})|({instr}))"
-
 # syntax idea: 
 # an IF statement is defined as
 # if <cond>, label
 # then cond can be defined as
 # either    <var> <compare> <var>    or  <var>
 
-print(funcdef)
+# try experimenting unnamed capture group
+patterns = [
+    ("FUNC",    r'func\s+([\w.%]+)'),
+    ("ARGS",    r'\(((\s*[\w.%]+\s*,?\s*)*)\)'),
+    ("LABEL",    r'([\w.%]+)\s*:'),
+    ("FUNC",    r'return\s+([\w.%]+)'),
+    ("FUNC",    r'([\w.%]+)\s*='),
+    ("FUNC",    r'call\s+([\w.%]+)'),
+    ("FUNC",    r'(\+|-|\*|\/|<<|>>|&|\||~)'),
+    ("FUNC",    r'(>|<|>=|<=|==|!=)'),
+    ("FUNC",    r'([\w.%]+)'),
+]
+patterns = [
+    r'func\s+(?P<FUNC>[\w.%]+)',
+    r'if\s+(?P<IF>[\w.%]+\s*(>|<|>=|<=|==|!=)\s*[\w.%]+)',
+    r'\((?P<ARGS>(\s*[\w.%]+\s*,?\s*)*)\)',
+    r'(?P<LABEL>[\w.%]+)\s*:',
+    r'return\s+(?P<RETURN>[\w.%]+)',
+    r'(?P<DEST>[\w.%]+)\s*=',
+    r'call\s+(?P<CALL>[\w.%]+)',
+    r'(?P<OP>\+|-|\*|\/|<<|>>|&|\||~)',
+    r'(?P<CMP>>|<|>=|<=|==|!=)',
+    r'(?P<OPERAND>[\w.%]+)',
+]
 
-def tokenize_ir(ir_string):
+# we have 2 unparsed subtokens: IF's comparison and ARGS items
+# ex [('IF', 'n > %i0'), ('OPERAND', 'recurse')]
+# ex [('FUNC', 'test_arg_parser'), ('ARGS', 'a, b, c')]
 
-    # Tokenize the IR string
-    print(ir_string, end='')
-    match = re.match(pattern, ir_string)
-    if match == None: print('cant parse')
-    else: print('\t\t', match.groupdict())
+def tokenize_ir(ir_string: str):
+    index = 0
+    while index < len(ir_string):
+        token = None
+        for pattern in patterns:
+            matched = re.match(f"\s*{pattern}\s*", ir_string[index:])
+            if matched != None:
+                index += matched.end()
+                token = list(matched.groupdict().items())[0]
+                break
+        if token: yield token
+        else: raise Exception(f'Unexpected token "{ir_string[index:]}"')
 
 SimplicIRParser().from_file("test_codes\\fib.ir")
