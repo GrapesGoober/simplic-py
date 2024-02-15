@@ -21,6 +21,9 @@ import re
 # either    <var> <compare> <var>    or  <var>
 
 # try experimenting unnamed capture group
+word = r'\s*([\w.%]+)\s*'
+args = r'\(%s(?:,%s)*,?\)' % (word, word)
+
 patterns = [
     ("FUNC",    r'func\s+([\w.%]+)'),
     ("ARGS",    r'\(((\s*[\w.%]+\s*,?\s*)*)\)'),
@@ -46,14 +49,40 @@ patterns = [
 ]
 
 # we have 2 unparsed subtokens: IF's comparison and ARGS items
-# ex [('IF', 'n > %i0'), ('OPERAND', 'recurse')]
-# ex [('FUNC', 'test_arg_parser'), ('ARGS', 'a, b, c')]
+# [('IF', 'n > %i0'), ('OPERAND', 'recurse')]
+# [('FUNC', 'test_arg_parser'), ('ARGS', 'a, b, c')]
+
+# also should group generic "operations" together as one unit
+'''
+"FUNC": {
+    "NAME" : "funcname",
+    "ARGS" : [] | None
+}
+
+"LABEL": {
+    "NAME": "start"
+}
+
+"OPERATION": {
+    "LEFT" : None | str
+    "OPERATOR" : None | both binary, unary, and comparison
+    "RIGHT" : None | str
+}
+
+
+'''
 
 def tokenize_ir(ir_string: str):
     index = 0
     while index < len(ir_string):
         token = None
         for pattern in patterns:
+
+            # testing out setargs
+            match_args = re.findall(word, ir_string[index:])
+            for m in match_args:
+                print("\targs", m)
+
             matched = re.match(f"\s*{pattern}\s*", ir_string[index:])
             if matched != None:
                 index += matched.end()
