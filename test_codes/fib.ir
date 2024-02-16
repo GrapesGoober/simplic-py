@@ -4,25 +4,41 @@ func main
         result = call fib_recursive(number)
         return 0
 
-func fib_recursive(n)
+func fib_recursive n
     start:
-        %i0 = 1
-        if n > %i0 recurse
+        %i0     = 1
+        if      n > %i0     recurse
         return n
     recurse:
-        %i0 = 1
-        %i1 = n - %i0
-        %i2 = call fib_recursive(%i1)
-        %i0 = 2
-        %i1 = n - %i0
-        %i3 = call fib_recursive(%i1)
-        result = %i2 + %i3
+        %i0     = 1
+        %i1     = n - %i0
+        %arg0   = %i1
+        %i2     = call fib_recursive
+        %i0     = 2
+        %i1     = n - %i0
+        %arg0   = %i1
+        %i3     = call fib_recursive
+        result  = %i2 + %i3
         return result
 
-func test_arg_parser(a, b, c)
-        ans = a + b
-        ans = ans - c
+func test_arg_parser a b c
+        ans     = a + b
+        ans     = ans - c
         return ans
     impossible:
-        ans = 123
+        ans     = 123
         return ans
+
+#
+# mem[V] = any
+# translate to 
+# 1- perform expression and put result onto accumulator
+# 2- if imm: set address to V; else: slide to V
+# 3- storep
+#
+# any = mem[V]
+# i.e. perfor
+# 1- if imm: set imm then slide; else slide
+# 2- loadp, value is now in A
+# 2- store this to variable just fine
+#

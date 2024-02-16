@@ -78,10 +78,10 @@ def tokenize_ir(ir_string: str):
         token = None
         for pattern in patterns:
 
-            # testing out setargs
-            match_args = re.findall(word, ir_string[index:])
-            for m in match_args:
-                print("\targs", m)
+            # # testing out setargs
+            # match_args = re.findall(word, ir_string[index:])
+            # for m in match_args:
+            #     print("\targs", m)
 
             matched = re.match(f"\s*{pattern}\s*", ir_string[index:])
             if matched != None:
