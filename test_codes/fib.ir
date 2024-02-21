@@ -25,6 +25,7 @@ func test_arg_parser a b c
         ans     = a + b
         ans     = ans - c
         return ans
+        if 1 == 1 goto impossible
     impossible:
         ans     = 123
         return ans
