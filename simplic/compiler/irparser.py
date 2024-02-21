@@ -27,8 +27,9 @@ patterns = [
     r'(?P<OPERAND>[\w.%]+)',
 ]
 
-instr_pattern = r'((?P<DEST>.*)\s*=\s*)?(?P<OPERATION>.*)'
 goto_pattern = r'(if\s*(?P<COMPARISON>.*))?\s*goto\s*(?P<GOTO>.*)'
+return_pattern = r'return\s*(?P<OPERATION>.*)'
+instr_pattern = r'((?P<DEST>.*)\s*=\s*)?(?P<OPERATION>.*)'
 
 sample_code = [
     "x = 3",
@@ -37,11 +38,14 @@ sample_code = [
     "goto label",
     "if x > 3 goto label",
     "call somefunc",
+    "return x"
 ]
 
 def tokenize_ir(ir_string: str):
     m = re.match(goto_pattern, ir_string)
+    if not m: m = re.match(return_pattern, ir_string)
     if not m: m = re.match(instr_pattern, ir_string)
+
     if m: return m.groupdict()
     else: return {}
     
