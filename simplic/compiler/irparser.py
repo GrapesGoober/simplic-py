@@ -4,7 +4,7 @@ class SimplicIRParser:
             for linenum, line in enumerate(file):
                 line = line.split("#")[0].lower()
                 if line.strip() == "": continue
-                print(list(tokenize_ir(line)))
+                print(list(parse_ir(line)))
 
 def psuedo_ir_instruction(operator, dest, operand1, operand2):
     if operand1 != None:    print(f'load from {operand1}')
@@ -41,16 +41,41 @@ sample_code = [
     "return x"
 ]
 
-def tokenize_ir(ir_string: str):
-    m = re.match(goto_pattern, ir_string)
-    if not m: m = re.match(return_pattern, ir_string)
-    if not m: m = re.match(instr_pattern, ir_string)
+def parse_ir(ircode: str):
+    m = re.match(goto_pattern, ircode)
+    if not m: m = re.match(return_pattern, ircode)
+    if not m: m = re.match(instr_pattern, ircode)
 
-    if m: return m.groupdict()
+    m = m.groupdict()
+    if 'DEST' in m and m['DEST']:
+        m['DEST'] = parse_dest(m['DEST'])
+
+    if m: return m
     else: return {}
+
+# NOTE: using named captures & groupdict is funky
+# might be better to do case-by-case, and name the DEST TYPE as tuples
+# ex: ('VAR': 'x')  ('PTR', '3')
+dest_pattern = r"(%s)|(%s)|(%s)" % (
+    r'arg\s*(?P<ARG>[\w.%]+)',
+    r'ptr\s*(?P<PTR>[\w.%]+)',
+    r'(?P<VAR>[\w.%]+)',
+)
+def parse_dest(dest_str: str):
+
+    m = re.match(dest_pattern, dest_str)
+    if not m: raise Exception("Invalid destination syntax")
+
+    # perform field type checking
+    m = m.groupdict()
+    if m["VAR"] and m["VAR"][0].isdigit():
+        raise Exception("Cannot assign values to number") 
+    if m["ARG"] and not m["ARG"][0].isdigit():
+        raise Exception("Argument specifier only accepts numbers")
+    return m
     
 
 for linenum, line in enumerate(sample_code):
     line = line.split("#")[0].lower()
     if line.strip() == "": continue
-    print(tokenize_ir(line))
+    print(parse_ir(line))
