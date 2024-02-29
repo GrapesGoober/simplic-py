@@ -31,6 +31,16 @@ goto_pattern = r'(if\s*(?P<COMPARISON>.*))?\s*goto\s*(?P<GOTO>.*)'
 return_pattern = r'return\s*(?P<OPERATION>.*)'
 instr_pattern = r'((?P<DEST>.*)\s*=\s*)?(?P<OPERATION>.*)'
 
+# What should be code output structure? How about tuple (not key-val pairs)?
+(
+    ('var', 'a'), # destination
+    (   # operation
+        ('var', 'b'),
+        ('+'),
+        ('var', 'c'),
+    )
+)
+
 sample_code = [
     "x = 3",
     "y = 2",
@@ -63,32 +73,28 @@ dest_pattern = [
     (r'([\w.%]+)', 'VAR')
 ]
 
+dest_pattern = r'(?P<SPECIFIER>\w*)\s*(?P<ADDRESS>[\w.%]+)'
+
 def parse_dest(dest_str: str):
 
-    m = re.match(r'arg\s*([\w.%]+)', dest_str)
-    if m:
-        if not m.group(1).isdigit():
-            raise Exception("Argument specifier only accepts numbers")
-        return 'ARG', m.group(1)
+    m = re.match(dest_pattern, dest_str)
+    if not m:
+        raise Exception("Invalid destination syntax")
+    m = m.groupdict()
 
-    m = re.match(r'ptr\s*([\w.%]+)', 'PTR')
-    if m: return 'PTR', m.group(1)
-
-    m = re.match(r'([\w.%]+)', 'VAR')
-    if m:
-        if m.group(1).isdigit():
-            raise Exception("Cannot assign values to number") 
-        return 'VAR', m.group(1)
-
-    # if not m: raise Exception("Invalid destination syntax")
-
-    # # perform field type checking
-    # m = m.groupdict()
-    # if m["VAR"] and m["VAR"][0].isdigit():
-    #     raise Exception("Cannot assign values to number") 
-    # if m["ARG"] and not m["ARG"][0].isdigit():
-    #     raise Exception("Argument specifier only accepts numbers")
-    # return m
+    match m['SPECIFIER'].upper():
+        case 'ARG':
+            if not m['ADDRESS'].isdigit():
+                raise Exception("Argument specifier only accepts numbers")
+            return m
+        case 'PTR': 
+            return m
+        case '':
+            if m['ADDRESS'].isdigit():
+                raise Exception("Cannot assign values to number") 
+            return m
+        case _:
+            raise Exception("Invalid specifier") 
     
 
 for linenum, line in enumerate(sample_code):
