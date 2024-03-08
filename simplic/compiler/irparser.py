@@ -29,11 +29,23 @@ patterns = [
 
 # What should be code output structure? How about tuple (not key-val pairs)?
 (
-    ('+'),        # operator
-    ('var', 'a'), # destination
-    ('var', 'b'), # L-operand
-    ('var', 'c'), # R-operand
+    'INSTR',        # type
+    '+',            # operator
+    ('PTR', 'a'),   # destination
+    ('VAR', 'b'),   # L-operand
+    ('IMM', '3'),   # R-operand
 )
+
+# IDEA: a 'GOTO' destination specifier? 
+(
+    '<',            # operator is defaulted to subtract
+    ('GOTO', 'a'),  # DEST now uses special conditional GOTO specifier
+    ('VAR', 'b'), 
+    ('VAR', 'c'), 
+)
+# This specifier should also not be available for syntax use, using if-goto only
+# This technique frees up 'type' field. Is this a good tradeoff?
+# In this case, the 'RETURN' would now be unary operator with no DEST field
 
 sample_code = """
     x = 3
