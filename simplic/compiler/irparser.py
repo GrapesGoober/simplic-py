@@ -46,57 +46,45 @@ sample_code = """
     return x
 """
 
-ircode_patterns = [
-    # ('GOTO',    r'(?:\s*if\s*(.*))?\s*goto\s*(.*)'),
-    # ('GOTO',    r'goto\s*(.*)\s*(?:if\s*(.*))?\s*'),
-    # ('RETURN',  r'()return\s*(.*)'),
-    # ('INSTR',   r'(?:(.*)\s*=\s*)?(.*)'),
-    
-    ('GOTO',    r'(?:\s*if\s*(?P<EXPR>.*))?\s*goto\s*(?P<DEST>.*)'),
-    ('RETURN',  r'(?P<DEST>)return\s*(?P<EXPR>.*)'),
-    ('INSTR',   r'(?:(?P<DEST>.*)\s*=\s*)?(?P<EXPR>.*)'),
-]
+def parse_ircode(ircode: str):
+    GOTO_PATTERN = r'(?:\s*if\s*(.*))?\s*goto\s*(.*)'
+    RETURN_PATTERN = r'return\s*(.*)'
+    INSTR_PATTERN = r'(?:(.*)\s*=\s*)?(.*)'
 
-def parse_ir(ircode: str):
-    for type, pattern in ircode_patterns:
-        m = re.match(pattern, ircode)
-        if m: return type, m.group()
-    return "NOT MATCHED"
+    if m := re.match(GOTO_PATTERN, ircode):
+        return 'GOTO',  m.group(2), m.group(1)
+    elif m := re.match(RETURN_PATTERN, ircode):
+        return 'RETURN', None, m.group(1)
+    elif m := re.match(INSTR_PATTERN, ircode):
+        if m.group(1) == None: dest = None
+        else: dest = parse_dest(m.group(1))
+        return 'INSTR',  dest, m.group(2)
+    raise Exception("Invalid syntax")
 
-# NOTE: using named captures & groupdict is funky
-# might be better to do case-by-case, and name the DEST TYPE as tuples
-# ex: ('VAR': 'x')  ('PTR', '3')
-dest_pattern = [
-    (r'arg\s*([\w.%]+)', 'ARG'),
-    (r'ptr\s*([\w.%]+)', 'PTR'),
-    (r'([\w.%]+)', 'VAR')
-]
+def parse_dest(ircode: str):
+    DEST_PATTERN = r'(\w*\s+)?\s*([\w.%]+)'
+    if m := re.match(DEST_PATTERN, ircode):
+        specifier, identifier = m.groups('')
+        specifier = specifier.upper().strip()
+        if specifier == '': specifier = 'VAR'
 
-dest_pattern = r'(?P<SPECIFIER>\w*)\s*(?P<ADDRESS>[\w.%]+)'
+        if specifier not in ('ARG', 'PTR', 'VAR'):
+            raise Exception("Invalid destination specifier")
+        elif specifier == 'ARG' and not identifier.isdigit():
+            raise Exception("Argument destination only accepts numbers")
+        elif specifier == 'VAR' and identifier.isdigit():
+            raise Exception("Variable destination cannot accept numbers")
+        return specifier, identifier
+    raise Exception("Invalid destination syntax")
 
-def parse_dest(dest_str: str):
+# these two expects different operators!
+def parse_arith_expr():
+    pass
 
-    m = re.match(dest_pattern, dest_str)
-    if not m:
-        raise Exception("Invalid destination syntax")
-    m = m.groupdict()
-
-    match m['SPECIFIER'].upper():
-        case 'ARG':
-            if not m['ADDRESS'].isdigit():
-                raise Exception("Argument specifier only accepts numbers")
-            return m
-        case 'PTR': 
-            return m
-        case '':
-            if m['ADDRESS'].isdigit():
-                raise Exception("Cannot assign values to number") 
-            return m
-        case _:
-            raise Exception("Invalid specifier") 
-    
+def parse_cmp_expr():
+    pass
 
 for linenum, line in enumerate(sample_code.split('\n')):
     line = line.split("#")[0].lower()
     if line.strip() == "": continue
-    print(parse_ir(line.strip()))
+    print(parse_ircode(line.strip()))
