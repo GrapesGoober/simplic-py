@@ -27,42 +27,41 @@ patterns = [
     r'(?P<OPERAND>[\w.%]+)',
 ]
 
-goto_pattern = r'(if\s*(?P<COMPARISON>.*))?\s*goto\s*(?P<GOTO>.*)'
-return_pattern = r'return\s*(?P<OPERATION>.*)'
-instr_pattern = r'((?P<DEST>.*)\s*=\s*)?(?P<OPERATION>.*)'
-
 # What should be code output structure? How about tuple (not key-val pairs)?
 (
+    ('+'),        # operator
     ('var', 'a'), # destination
-    (   # operation
-        ('var', 'b'),
-        ('+'),
-        ('var', 'c'),
-    )
+    ('var', 'b'), # L-operand
+    ('var', 'c'), # R-operand
 )
 
-sample_code = [
-    "x = 3",
-    "y = 2",
-    "ptr a = b + c",
-    "arg 3 = b + c",
-    "goto label",
-    "if x > 3 goto label",
-    "call somefunc",
-    "return x"
+sample_code = """
+    x = 3
+    y = 2
+    ptr a = b + c
+    arg 3 = b + c
+    goto loop_point_1
+    if x > 3 goto return_point_1
+    call somefunc
+    return x
+"""
+
+ircode_patterns = [
+    # ('GOTO',    r'(?:\s*if\s*(.*))?\s*goto\s*(.*)'),
+    # ('GOTO',    r'goto\s*(.*)\s*(?:if\s*(.*))?\s*'),
+    # ('RETURN',  r'()return\s*(.*)'),
+    # ('INSTR',   r'(?:(.*)\s*=\s*)?(.*)'),
+    
+    ('GOTO',    r'(?:\s*if\s*(?P<EXPR>.*))?\s*goto\s*(?P<DEST>.*)'),
+    ('RETURN',  r'(?P<DEST>)return\s*(?P<EXPR>.*)'),
+    ('INSTR',   r'(?:(?P<DEST>.*)\s*=\s*)?(?P<EXPR>.*)'),
 ]
 
 def parse_ir(ircode: str):
-    m = re.match(goto_pattern, ircode)
-    if not m: m = re.match(return_pattern, ircode)
-    if not m: m = re.match(instr_pattern, ircode)
-
-    m = m.groupdict()
-    if 'DEST' in m and m['DEST']:
-        m['DEST'] = parse_dest(m['DEST'])
-
-    if m: return m
-    else: return {}
+    for type, pattern in ircode_patterns:
+        m = re.match(pattern, ircode)
+        if m: return type, m.group()
+    return "NOT MATCHED"
 
 # NOTE: using named captures & groupdict is funky
 # might be better to do case-by-case, and name the DEST TYPE as tuples
@@ -97,7 +96,7 @@ def parse_dest(dest_str: str):
             raise Exception("Invalid specifier") 
     
 
-for linenum, line in enumerate(sample_code):
+for linenum, line in enumerate(sample_code.split('\n')):
     line = line.split("#")[0].lower()
     if line.strip() == "": continue
-    print(parse_ir(line))
+    print(parse_ir(line.strip()))
