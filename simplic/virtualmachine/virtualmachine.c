@@ -7,23 +7,24 @@
 typedef uint16_t    word;   // default to 16 bit word size
 typedef uint8_t     byte;   // define a byte as an 8-bit word
 
-// the SimplicVM is a Harvard architecture, using only main memory as state
+// the SimplicVM is a Harvard architecture, and uses the main memory to store internal state
 typedef struct SimplicVM {
     word instr[SIZE], mem[SIZE];
 } SimplicVM;
 
 // this VM handles initializing, step execution, and running VM
-SimplicVM* init();
+void init(SimplicVM *vm);
 void execute(SimplicVM *vm);
 void run(SimplicVM *sm);
 
 // initialize vm and load the program
-SimplicVM* init() {
-    SimplicVM *vm = (SimplicVM*)malloc(sizeof(SimplicVM));
-    vm->mem[0] = 0, vm->mem[2] = 0xFFFF; // init default values
-    word count = 0; // load program from stdin
+void init(SimplicVM *vm) {
+    // allocate and initialize default values
+    vm = (SimplicVM*)malloc(sizeof(SimplicVM));
+    vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
+    // load program from stdin
+    word count = 0; 
     while (scanf("%2hhx", &vm->instr[count++]) == 1);
-    return vm;
 }
 
 // execute the current vm state
@@ -92,16 +93,21 @@ void run(SimplicVM *sm) {
     }
 }
 
-void main() {
-
-
-    
+void print(SimplicVM *vm) {
+    word PC = vm->mem[0], SP = vm->mem[2];
     printf("internal state\n");
-    printf("  PC\t%d\n", *PC);
+    printf("  PC\t%d\n", PC);
     printf("stack\n");
     for (int i = 0; i < 0x10; i++) {
-        printf("  %x\t%d\n", i, mem[*SP - i]);
+        printf("  %x\t%d\n", i, vm->mem[SP - i]);
     }
+}
+
+void main() {
+    SimplicVM *vm;
+    init(vm);
+    run(vm);
+    print(vm);
 }
 
 // gcc simplic\virtualmachine\virtualmachine.c -o simplic\virtualmachine\virtualmachine.exe
