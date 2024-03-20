@@ -41,20 +41,20 @@ void execute(SimplicVM *vm) {
     word  *V    = &vm->instr[*SP - I8];
 
     bool Z = *A == 0, N = *A >> 15;
-    // bool cond[] = { 1, N, !(Z | N), Z, !Z, (Z | N), !N };
-    switch (COND)
-    {
-        case 0x0: COND = true;        break;  // always
-        case 0x1: COND = N;           break;  // less than (negative)
-        case 0x2: COND = !(Z | N);    break;  // more than (positive)
-        case 0x3: COND = Z;           break;  // equals (zero)
-        case 0x4: COND = !Z;          break;  // not equals (not zero)
-        case 0x5: COND = (Z | N);     break;  // less than or equal (positive or zero)
-        case 0x6: COND = !N;          break;  // more than or equal (not negative)
-        default: break;
-    }
+    // switch (COND)
+    // {
+    //     case 0x0: COND = true;        break;  // always
+    //     case 0x1: COND = N;           break;  // less than (negative)
+    //     case 0x2: COND = !(Z | N);    break;  // more than (positive)
+    //     case 0x3: COND = Z;           break;  // equals (zero)
+    //     case 0x4: COND = !Z;          break;  // not equals (not zero)
+    //     case 0x5: COND = (Z | N);     break;  // less than or equal (positive or zero)
+    //     case 0x6: COND = !N;          break;  // more than or equal (not negative)
+    //     default: break;
+    // }
+    bool flags[] = { 1, N, !(Z | N), Z, !Z, (Z | N), !N };
 
-    if (COND) {
+    if (flags[COND]) {
         // execute instruction
         switch (OP) {
             case 0x0: *A = *V;              break;  // Load
