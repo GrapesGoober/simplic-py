@@ -12,19 +12,12 @@ typedef struct SimplicVM {
     word instr[SIZE], mem[SIZE];
 } SimplicVM;
 
-void init   (SimplicVM *vm); // initialize VM and load the program from stdin
 void execute(SimplicVM *vm); // step execute the current VM state
-void run    (SimplicVM *sm); // continuously run the VM until halts, handle IO, and print final state
+void run    (SimplicVM *sm); // initialize and continuously run VM
 
 void main() {
     SimplicVM *vm = (SimplicVM*)malloc(sizeof(SimplicVM));
     init(vm); run(vm); print(vm); free(vm);
-}
-
-void init(SimplicVM *vm) {
-    vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
-    word count = 0; 
-    while (scanf("%2hhx", &vm->instr[count++]) == 1);
 }
 
 void execute(SimplicVM *vm) {
@@ -64,6 +57,11 @@ void execute(SimplicVM *vm) {
 }
 
 void run(SimplicVM *vm) {
+
+    vm->mem[0] = 0, vm->mem[2] = 0xFFFF;
+    word count = 0; 
+    while (scanf("%2hhx", &vm->instr[count++]) == 1);
+
     while (vm->mem[0] != 0xFFFF) {
         execute(vm);
         switch (vm->mem[3]) {
