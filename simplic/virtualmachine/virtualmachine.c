@@ -22,35 +22,37 @@ void execute() { // step execute the current VM state
     if (flags[cond]) {
         // if true, executes depending on opcode
         switch (opcode) {
-            case 0x0: A = *V;              break;  // Load
-            case 0x1: *V = A;              break;  // Store
-            case 0x2: A = mem[*V];         break;  // Load Pointer
-            case 0x3: mem[*V] = A;         break;  // Store Pointer
-            case 0x4: A +=  *V;            break;  // Add
-            case 0x5: A -=  *V;            break;  // Sub
-            case 0x6: A <<= *V;            break;  // LSL
-            case 0x7: A >>= *V;            break;  // LSR
-            case 0x8: A *=  *V;            break;  // Mul
-            case 0x9: A /=  *V;            break;  // Div
-            case 0xA: A &=  *V;            break;  // And
-            case 0xB: A |=  *V;            break;  // Or
-            case 0xC: A =  ~*V;            break;  // Not
+            case 0x0: A = *V;               break;  // Load
+            case 0x1: *V = A;               break;  // Store
+            case 0x2: A = mem[*V];          break;  // Load Pointer
+            case 0x3: mem[*V] = A;          break;  // Store Pointer
+            case 0x4: A +=  *V;             break;  // Add
+            case 0x5: A -=  *V;             break;  // Sub
+            case 0x6: A <<= *V;             break;  // LSL
+            case 0x7: A >>= *V;             break;  // LSR
+            case 0x8: A *=  *V;             break;  // Mul
+            case 0x9: A /=  *V;             break;  // Div
+            case 0xA: A &=  *V;             break;  // And
+            case 0xB: A |=  *V;             break;  // Or
+            case 0xC: A =  ~*V;             break;  // Not
             // TODO: slide up and down with MSB as direction and 7 bits as distance
-            case 0xD: SP += imm; A = SP; break;  // Stack Slide
+            case 0xD: SP += imm; A = SP;    break;  // Stack Slide
             case 0xE: *V = *V<<8 | imm;     break;  // Insert
-            case 0xF: PC = *V;             break;  // Goto                                        
+            case 0xF: PC = *V;              break;  // Goto                                        
         }  
     }
-    // lastly, increment program counter for the next instruction
+    // lastly, increment program counter for the next execution
     PC += 1;
 }
 
 int main() {
 
-    word count = 0; // initialize program from stdin
+    // first, initialize program from stdin
+    word count = 0;
     while (scanf("%2hhx", &program[count++]) == 1);
 
-    while (PC != 0xFFFF) { // run VM with IO and halt condition
+    // next run VM with IO until reached the halt condition
+    while (PC != 0xFFFF) { 
         execute();
         if (mem[0] == 1) printf("%c", mem[1]); // output to stdout
         if (mem[0] == 2) scanf("%c", &mem[1]); // recieve character from stdin
