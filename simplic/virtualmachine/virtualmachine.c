@@ -14,8 +14,8 @@ void execute() { // step execute the current VM state
 
     // first, decode the current instruction
     word instr = PROG[PC];
-    byte opcode = instr >> 12, imm = instr & 0xFF, cond = instr>>8 & 0x4;
-    word *V = MEM[SP - imm];
+    byte opcode = instr >> 12, I8 = instr & 0xFF, cond = instr>>8 & 0x4;
+    word *V = MEM[SP - I8];
 
     // next, check the condition
     bool Z = A == 0, N = A >> 15;
@@ -36,9 +36,10 @@ void execute() { // step execute the current VM state
             case 0xA: A &=  *V;             break;  // And
             case 0xB: A |=  *V;             break;  // Or
             case 0xC: A =  ~*V;             break;  // Not
-            case 0xD: SP += imm; A = SP;    break;  // Stack Slide
-            case 0xE: *V = *V<<8 | imm;     break;  // Insert
-            case 0xF: PC = *V;              break;  // Goto                                        
+            case 0xD: A = A<<8 | I8;    break;  // Insert
+            case 0xE: PC = *V;          break;  // Goto                                        
+            case 0xF: SP += I8 - 127;      
+                      A = SP;           break;  // Stack Slide
         }  
     }
     // lastly, increment program counter for the next execution
