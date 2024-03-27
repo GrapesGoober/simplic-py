@@ -15,7 +15,7 @@ void execute() { // step execute the current VM state
     // first, decode the current instruction
     word instr = PROG[PC];
     byte opcode = instr >> 12, I8 = instr & 0xFF, cond = instr>>8 & 0x4;
-    word *V = MEM[SP - I8];
+    word *V = &MEM[SP - I8];
 
     // next, check the condition
     bool Z = A == 0, N = A >> 15;
