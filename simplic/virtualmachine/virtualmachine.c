@@ -37,7 +37,7 @@ void execute() { // step execute the current VM state
             case 0xB: A |=  *V;         break;  // Or
             case 0xC: A  = ~*V;         break;  // Not
             case 0xD: A  = A<<8 | I8;   break;  // Insert
-            case 0xE: PC = *V;          break;  // Goto 
+            case 0xE: PC = A;           break;  // Goto 
             case 0xF: SP += I8 - 127;           // Stack Slide
                       A  = SP;          break;  
         }  
