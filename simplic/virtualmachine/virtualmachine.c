@@ -54,10 +54,10 @@ int main() {
 
     // next run VM with IO until reached the halt condition
     while (PC != 0xFFFF) { 
+        MEM[0] = 0;
         execute();
         if (MEM[0] == 1) printf("%c", MEM[1]); // output to stdout
         if (MEM[0] == 2) scanf("%c", &MEM[1]); // recieve character from stdin
-        MEM[0] = 0;
     }
 
     printf("PC\t%d\n", PC);
